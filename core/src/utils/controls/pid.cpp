@@ -101,6 +101,8 @@ double PID::get_error() {
     return target - sensor_val;
 }
 
+double PID::get_output() { return out; }
+
 double PID::get_target() const { return target; }
 
 /**

@@ -131,9 +131,12 @@ class PID : public Feedback {
      * specified in pid_config_t
      */
     double get_error();
+    /**
+     * @return the output from the pid
+     */
+    double get_output();
 
     /**
-<<<<<<< HEAD
      * Get the PID's target
      * @return the target the PID controller is trying to achieve
      */
@@ -171,51 +174,6 @@ class PID : public Feedback {
 
     bool is_checking_on_target = false; ///< true if the sensor reading is within target +/- deadband
 
-=======
-     * Get the output calculated from the P, I, D and Error values
-     * @return the output calculated from the pid controller
-     * specified in pid_config_t
-     */
-    double get_output();
-
-    /**
-     * Get the PID's target
-     * @return the target the PID controller is trying to achieve
-     */
-    double get_target() const;
-
-    /**
-     * Set the target for the PID loop, where the robot is trying to end up
-     * @param target the sensor reading we would like to achieve
-     */
-    void set_target(double target);
-
-    pid_config_t &config; ///< configuration struct for this controller. see pid_config_t
-                          ///< for information about what this contains
-
-  private:
-    double last_error = 0;  ///< the error measured on the last iteration of update()
-    double accum_error = 0; ///< the integral of error over time since we called init()
-
-    double last_time = 0;           ///< the time measured the last time update() was called
-    double on_target_last_time = 0; ///< the time at which we started being on target
-
-    double lower_limit = 0; ///< the PID controller will never set a target to go lower than this
-    double upper_limit = 0; ///< the PID controller will never set a target to go higher than this
-
-    double target = 0;     ///< the target position of the PID controller (lower_limit
-                           ///< <= target <= upper_limit)
-    double target_vel = 0; ///< the target velocity of the PID controller (if !=
-                           ///< 0, controller will not wait for stop)
-    double sensor_val = 0; ///< the last recorded value of the sensor we use to
-                           ///< feed the PID controller
-    double out = 0;        ///< the last calculated output value. we save it here so that
-                           ///< we don't have to recalculate if we ask for it more than
-                           ///< once between update() calls
-
-    bool is_checking_on_target = false; ///< true if the sensor reading is within target +/- deadband
-
->>>>>>> af42b253cfcdcc3b7cfb14c3e517806af56d1319
     timer pid_timer; ///< used for calculating integrals and derivatives in line
                      ///< with the real world times and checking the time we are
                      ///< on target
