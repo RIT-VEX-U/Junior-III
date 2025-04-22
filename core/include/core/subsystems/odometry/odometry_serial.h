@@ -1,5 +1,6 @@
 #pragma once
 
+<<<<<<< HEAD
 #include "core\/utils/math/eigen_interface.h"
 #include <v5_api.h>
 
@@ -50,6 +51,19 @@
 // resolution of about 0.096 rps^2 (5.5 dps^2)
 #define RPSS_TO_INT16 10.43037835047045f
 #define INT16_TO_RPSS 0.0958737992428526
+=======
+// These are required for Eigen to compile
+// https://www.vexforum.com/t/eigen-integration-issue/61474/5
+#undef __ARM_NEON__
+#undef __ARM_NEON
+#include <Eigen/Dense>
+
+#include "core/subsystems/custom_encoder.h"
+#include "core/subsystems/odometry/odometry_base.h"
+#include "core/utils/math_util.h"
+
+#include "core/utils/math/geometry/pose2d.h"
+>>>>>>> af42b253cfcdcc3b7cfb14c3e517806af56d1319
 
 /**
  * OdometrySerial
@@ -57,15 +71,29 @@
  * This class handles the code for an odometry setup where calculations are done on an external coprocessor.
  * Data is sent to the brain via smart port, using a generic serial (UART) connection.
  *
+<<<<<<< HEAD
  * This is a "set and forget" class, meaning once the object is created, the robot will immediately begin
  * tracking it's movement in the background.
  *
  * @author Jack Cammarata
  * @date Apr 8 2025
+=======
+ *
+ *
+ * This is a "set and forget" class, meaning once the object is created, the robot will immediately begin
+ * tracking it's movement in the background.
+ *
+ * https://rit.enterprise.slack.com/files/U04112Y5RB6/F080M01KPA5/predictperpindiculars2.pdf
+ * 2024-2025 Notebook: Entries/Software Entries/Localization/N-Pod Odometry
+ *
+ * @author Jack Cammarata
+ * @date Jan 16 2025
+>>>>>>> af42b253cfcdcc3b7cfb14c3e517806af56d1319
  */
 class OdometrySerial : public OdometryBase {
   public:
     /**
+<<<<<<< HEAD
      * Construct a new Odometry Serial object.
      */
     OdometrySerial(bool is_async, int32_t port, int32_t baudrate);
@@ -75,10 +103,28 @@ class OdometrySerial : public OdometryBase {
      * update pos, vel, acc, speed, accel, angular speed, angular accel.
      *
      * @return the robot's updated position.
+=======
+     * Construct a new Odometry Serial Object
+     */
+    OdometrySerial(
+      bool is_async, bool calc_vel_acc_on_brain, Pose2d initial_pose, Pose2d sensor_offset, int32_t port,
+      int32_t baudrate
+    );
+
+    void send_config(const Pose2d &initial_pose, const Pose2d &sensor_offset, const bool &calc_vel_acc_on_brain);
+
+    int background_task(void *ptr);
+
+    /**
+     * Update the current position of the robot once by reading a single packet from the serial port
+     *
+     * @return the robot's updated position
+>>>>>>> af42b253cfcdcc3b7cfb14c3e517806af56d1319
      */
     Pose2d update() override;
 
     /**
+<<<<<<< HEAD
      * Attempts to receive a packet given a length, this automatically decodes it.
      *
      * @param port the port number the serial is plugged into.
@@ -141,16 +187,43 @@ class OdometrySerial : public OdometryBase {
      * @param raw_to_h Angular conversion factor.
      */
     void pose_to_regs(uint8_t *raw, Pose2d &pose, float raw_to_xy, float raw_to_h);
+=======
+     * Resets the position and rotational data to the input.
+     */
+    void set_position(const Pose2d &new_pose) override;
+
+    int receive_cobs_packet(uint32_t port, uint8_t *buffer, size_t buffer_size);
+
+    Pose2d get_position(void) override;
+
+    Pose2d get_pose2d(void);
+
+    size_t cobs_decode(const uint8_t *buffer, size_t length, void *data);
+
+    size_t cobs_encode(const void *data, size_t length, uint8_t *buffer);
+
+    double get_speed() override;
+
+    double get_accel() override;
+>>>>>>> af42b253cfcdcc3b7cfb14c3e517806af56d1319
 
   private:
     int32_t _port;
 
+<<<<<<< HEAD
     uint8_t raw[18];
 
     Pose2d pos{0, 0, 0};
     Pose2d vel{0, 0, 0};
     Pose2d acc{0, 0, 0};
     Pose2d prev{0, 0, 0};
+=======
+    bool calc_vel_acc_on_brain;
+
+    Pose2d pose;
+
+    Pose2d pose_offset;
+>>>>>>> af42b253cfcdcc3b7cfb14c3e517806af56d1319
 
     double speed;
     double accel;
