@@ -7,10 +7,10 @@ void testing();
 /**
  * Main entrypoint for the driver control period
  */
-
+bool enableDrive = true;
 void opcontrol() {
     // autonomous();
-    // testing();
+    testing();
 
     goal_grabber.pressed([]() { clamper_sys.toggle_clamp(); });
 
@@ -44,14 +44,14 @@ void opcontrol() {
         }
         OdometryBase *odombase = &odom;
         Pose2d pos = odombase->get_position();
-        // printf(
-        //   "ODO X: %.2f, Y: %.2f, R:%.2f, PID ERROR: %f\n", pos.x(), pos.y(), drive_pid.get_error(),
-        //   conveyor.current()
-        // );
 
         double left = (double)con.Axis3.position() / 100;
         double right = (double)con.Axis1.position() / 100;
-        drive_sys.drive_arcade(left, right, 1, TankDrive::BrakeType::None);
+        if (enableDrive) {
+            printf("ODO X: %.2f, Y: %.2f, R:%.2f\n", pos.x(), pos.y(), pos.rotation().degrees());
+            drive_sys.drive_arcade(left, right, 1, TankDrive::BrakeType::None);
+        }
+
         vexDelay(20);
     }
 
@@ -60,5 +60,26 @@ void opcontrol() {
 
 void testing() {
 
-    con.ButtonX.pressed([]() { printf("running test"); });
+    con.ButtonX.pressed([]() {
+        printf("running test");
+        enableDrive = false;
+        CommandController cc{
+          new Async(new FunctionCommand([]() {
+              while (true) {
+                  printf(
+                    "ODO X: %f ODO Y: %f, ODO ROT: %f, Drivepid Error: %f\n", odom.get_position().x(),
+                    odom.get_position().y(), odom.get_position().rotation().degrees(), turn_pid.get_error()
+                  );
+                  vexDelay(100);
+              }
+              return true;
+          })),
+          odom.SetPositionCmd({0, 0, 0}),
+          drive_sys.TurnToPointCmd(60, 112),
+          drive_sys.DriveToPointCmd(60, 112),
+
+        };
+        cc.run();
+        enableDrive = true;
+    });
 }
