@@ -6,7 +6,8 @@ vex::controller con;
 
 // ================ INPUTS ================
 // Digital sensors
-vex::inertial imu(vex::PORT2);
+vex::inertial imu(vex::PORT12);
+vex::distance clamper_sensor(vex::PORT18);
 
 // ================ OUTPUTS ================
 // Motors
@@ -39,7 +40,7 @@ const vex::controller::button &conveyor_button_rev = con.ButtonR2;
 PID::pid_config_t drive_pid_cfg{
   .p = 0.5,
   .i = 0,
-  .d = 0,
+  .d = 0.03,
   .deadband = 0.5,
   .on_target_time = 0.1,
 };
@@ -47,9 +48,9 @@ PID::pid_config_t drive_pid_cfg{
 PID drive_pid{drive_pid_cfg};
 
 PID::pid_config_t turn_pid_cfg{
-  .p = 0.042,
-  .i = 0.003,
-  .d = 0.0025,
+  .p = 0.05,
+  .i = 0.0,
+  .d = 0.001,
   .deadband = 1.0,
   .on_target_time = 0.1,
   .error_method = PID::ERROR_TYPE::LINEAR,
@@ -58,9 +59,9 @@ PID::pid_config_t turn_pid_cfg{
 
 PID::pid_config_t correction_pid_cfg{
   .p = 0.05,
-  .i = 0,
-  .d = 0,
-  .deadband = 0.5,
+  .i = 0.0,
+  .d = 0.001,
+  .deadband = 1.0,
 };
 
 FeedForward::ff_config_t drive_ff_cfg{.kS = 0.01, .kV = 0.015, .kA = 0.002, .kG = 0};
@@ -70,7 +71,7 @@ PID turn_pid{turn_pid_cfg};
 
 robot_specs_t robot_cfg = {
   .robot_radius = 10,
-  .odom_wheel_diam = 2.75,
+  .odom_wheel_diam = 1.75,
   .odom_gear_ratio = 0.75,
   .dist_between_wheels = 12.4,
 
@@ -85,8 +86,8 @@ ClamperSys clamper_sys{};
 IntakeSys intake_sys{};
 
 Pose2d zero{0, 0, from_degrees(0)};
+Pose2d blue_r_test{124.6, 101.6, from_degrees(180)};
 
-// OdometrySerial odom();
 OdometryTank odom(left_drive_motors, right_drive_motors, robot_cfg, &imu);
 
 TankDrive drive_sys(left_drive_motors, right_drive_motors, robot_cfg, &odom);
@@ -100,11 +101,10 @@ void print_multiline(const std::string &str, int y, int x);
  * Main robot initialization on startup. Runs before opcontrol and autonomous are started.
  */
 void robot_init() {
-    odom.set_position(zero);
+    odom.set_position(blue_r_test);
     while (imu.isCalibrating()) {
         vexDelay(10);
     }
     screen::start_screen(Brain.Screen, {new screen::PIDPage(turn_pid, "turnpid")});
-    vexDelay(1000);
     printf("started!\n");
 }

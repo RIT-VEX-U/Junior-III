@@ -24,13 +24,24 @@ class ClamperSys {
     void rush_out();
     void rush_in();
 
+    void auto_clamp_on();
+    void auto_clamp_off();
+
+    bool is_auto_clamping();
+
+    void auto_clamp();
+
     bool is_clamped();
     bool is_rush_out();
     AutoCommand *ClampCmd(ClamperState state);
-    AutoCommand *RushCmd(ClamperState state);
+    AutoCommand *RushCmd(RushState state);
+
+    AutoCommand *AutoClampCmd(bool do_auto_clamping);
 
   private:
     static int thread_fn(void *ptr);
+
+    bool doAutoClamping = false;
 
     vex::task task;
     ClamperState clamper_state = ClamperState::UNCLAMPED;

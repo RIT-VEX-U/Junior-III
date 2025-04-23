@@ -9,7 +9,6 @@
 #include "core/subsystems/odometry/odometry_3wheel.h"
 #include "core/subsystems/odometry/odometry_base.h"
 #include "core/subsystems/odometry/odometry_nwheel.h"
-#include "core/subsystems/odometry/odometry_serial.h"
 #include "core/subsystems/odometry/odometry_tank.h"
 #include "core/subsystems/screen.h"
 #include "core/subsystems/tank_drive.h"

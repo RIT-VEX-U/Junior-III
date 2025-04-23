@@ -2,7 +2,6 @@
 #include "TempSubSystems/TempSubSystems.h"
 #include "core.h"
 #include "core/subsystems/fun/video.h"
-#include "core/subsystems/odometry/odometry_serial.h"
 #include "inttypes.h"
 #include "vex.h"
 
@@ -13,7 +12,7 @@ extern vex::controller con;
 
 // ================ INPUTS ================
 // Digital sensors
-
+extern vex::distance clamper_sensor;
 // Analog sensors
 
 // ================ OUTPUTS ================

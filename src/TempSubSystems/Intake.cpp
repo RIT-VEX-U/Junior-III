@@ -76,7 +76,6 @@ AutoCommand *IntakeSys::IntakeStopCmd() {
 AutoCommand *IntakeSys::ConveyorInCmd(double amt) {
     return new FunctionCommand([this, amt]() {
         conveyor_in(amt);
-        conveyorStarted = true;
         return true;
     });
 }
@@ -84,7 +83,6 @@ AutoCommand *IntakeSys::ConveyorInCmd(double amt) {
 AutoCommand *IntakeSys::ConveyorOutCmd(double amt) {
     return new FunctionCommand([this, amt]() {
         conveyor_out(amt);
-        conveyorStarted = true;
         return true;
     });
 }
@@ -92,7 +90,6 @@ AutoCommand *IntakeSys::ConveyorOutCmd(double amt) {
 AutoCommand *IntakeSys::ConveyorStopCmd() {
     return new FunctionCommand([this]() {
         conveyor_stop();
-        conveyorStarted = false;
         return true;
     });
 }

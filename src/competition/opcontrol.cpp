@@ -38,20 +38,20 @@ void opcontrol() {
     // ================ INIT ================
 
     while (true) {
-        if (!conveyor_button.pressing() && !conveyor_button_rev.pressing()) {
-            intake_sys.intake_stop();
-            intake_sys.conveyor_stop();
-        }
-        OdometryBase *odombase = &odom;
-        Pose2d pos = odombase->get_position();
-
-        double left = (double)con.Axis3.position() / 100;
-        double right = (double)con.Axis1.position() / 100;
         if (enableDrive) {
+
+            if (!conveyor_button.pressing() && !conveyor_button_rev.pressing()) {
+                intake_sys.intake_stop();
+                intake_sys.conveyor_stop();
+            }
+            OdometryBase *odombase = &odom;
+            Pose2d pos = odombase->get_position();
+
+            double left = (double)con.Axis3.position() / 100;
+            double right = (double)con.Axis1.position() / 100;
             printf("ODO X: %.2f, Y: %.2f, R:%.2f\n", pos.x(), pos.y(), pos.rotation().degrees());
             drive_sys.drive_arcade(left, right, 1, TankDrive::BrakeType::None);
         }
-
         vexDelay(20);
     }
 
@@ -67,16 +67,39 @@ void testing() {
           new Async(new FunctionCommand([]() {
               while (true) {
                   printf(
-                    "ODO X: %f ODO Y: %f, ODO ROT: %f, Drivepid Error: %f\n", odom.get_position().x(),
+                    "ODO X: %f ODO Y: %f, ODO ROT: %f, TurnPID Error: %f\n", odom.get_position().x(),
                     odom.get_position().y(), odom.get_position().rotation().degrees(), turn_pid.get_error()
                   );
                   vexDelay(100);
               }
               return true;
           })),
-          odom.SetPositionCmd({0, 0, 0}),
-          drive_sys.TurnToPointCmd(60, 112),
-          drive_sys.DriveToPointCmd(60, 112),
+
+          odom.SetPositionCmd({124.6, 101.6, from_degrees(180)}),
+          drive_sys.TurnToHeadingCmd(172),
+          clamper_sys.RushCmd(ClamperSys::RushState::OUT),
+          drive_sys.DriveForwardCmd(40),
+          clamper_sys.RushCmd(ClamperSys::RushState::IN),
+          new DelayCommand(50),
+          drive_sys.DriveForwardCmd(24, vex::reverse),
+          drive_sys.TurnToHeadingCmd(231),
+          intake_sys.IntakeCmd(),
+          intake_sys.ConveyorInCmd(),
+          clamper_sys.RushCmd(ClamperSys::RushState::OUT),
+          drive_sys.DriveForwardCmd(38),
+          clamper_sys.RushCmd(ClamperSys::RushState::IN),
+          drive_sys.DriveForwardCmd(24, vex::reverse),
+          drive_sys.TurnToPointCmd(97.5, 113, vex::reverse),
+          clamper_sys.AutoClampCmd(true),
+          drive_sys.DriveToPointCmd(97.5, 113, vex::reverse, 0.3),
+          clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
+          drive_sys.TurnToHeadingCmd(45),
+          intake_sys.IntakeCmd(),
+          intake_sys.ConveyorInCmd(),
+          drive_sys.DriveForwardCmd(23),
+          new DelayCommand(10000),
+          intake_sys.IntakeStopCmd(),
+          intake_sys.ConveyorStopCmd(),
 
         };
         cc.run();

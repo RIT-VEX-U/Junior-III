@@ -21,18 +21,18 @@ class IntakeSys {
 
     void intake_stop();
 
-    void conveyor_in(double volts = 10);
+    void conveyor_in(double volts = 12.0);
     void conveyor_stop();
-    void conveyor_out(double volts = 10);
+    void conveyor_out(double volts = 12.0);
 
     static int thread_fn(void *ptr);
 
-    AutoCommand *IntakeCmd(double amt = 10.0);
-    AutoCommand *OuttakeCmd(double amt = 10.0);
+    AutoCommand *IntakeCmd(double amt = 12.0);
+    AutoCommand *OuttakeCmd(double amt = 12.0);
     AutoCommand *IntakeStopCmd();
 
-    AutoCommand *ConveyorInCmd(double amt = 10.0);
-    AutoCommand *ConveyorOutCmd(double amt = 10.0);
+    AutoCommand *ConveyorInCmd(double amt = 12.0);
+    AutoCommand *ConveyorOutCmd(double amt = 12.0);
     AutoCommand *ConveyorStopCmd();
 
   private:
@@ -40,8 +40,7 @@ class IntakeSys {
     IntakeState intake_state = IntakeState::STOP;
     IntakeState conveyor_state = IntakeState::STOP;
     double intakeVolts = 12;
-    double conveyorVolts = 10;
-    int color_sensor_counter = 0;
+    double conveyorVolts = 12;
     bool conveyorStarted = false;
     double sortConveyorVolts = 12;
 };
