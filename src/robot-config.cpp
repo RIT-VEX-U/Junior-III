@@ -88,9 +88,9 @@ IntakeSys intake_sys{};
 Pose2d zero{0, 0, from_degrees(0)};
 Pose2d blue_r_test{124.6, 101.6, from_degrees(180)};
 
-OdometryTank odom(left_drive_motors, right_drive_motors, robot_cfg, &imu);
+// OdometryTank odom(left_drive_motors, right_drive_motors, robot_cfg, &imu);
 
-TankDrive drive_sys(left_drive_motors, right_drive_motors, robot_cfg, &odom);
+TankDrive drive_sys(left_drive_motors, right_drive_motors, robot_cfg);
 
 // A global instance of vex::brain used for printing to the V5 brain screen
 void print_multiline(const std::string &str, int y, int x);
@@ -101,10 +101,10 @@ void print_multiline(const std::string &str, int y, int x);
  * Main robot initialization on startup. Runs before opcontrol and autonomous are started.
  */
 void robot_init() {
-    odom.set_position(blue_r_test);
-    while (imu.isCalibrating()) {
-        vexDelay(10);
-    }
-    screen::start_screen(Brain.Screen, {new screen::PIDPage(turn_pid, "turnpid")});
+    // odom.set_position(blue_r_test);
+    // while (imu.isCalibrating()) {
+    //     vexDelay(10);
+    // }
+    // screen::start_screen(Brain.Screen, {new screen::PIDPage(turn_pid, "turnpid")});
     printf("started!\n");
 }
