@@ -102,9 +102,9 @@ void print_multiline(const std::string &str, int y, int x);
  */
 void robot_init() {
     // odom.set_position(blue_r_test);
-    // while (imu.isCalibrating()) {
-    //     vexDelay(10);
-    // }
+    while (imu.isCalibrating()) {
+        vexDelay(10);
+    }
     // screen::start_screen(Brain.Screen, {new screen::PIDPage(turn_pid, "turnpid")});
     printf("started!\n");
 }

@@ -33,6 +33,8 @@ extern vex::motor intake_motor;
 extern vex::motor_group left_drive_motors;
 extern vex::motor_group right_drive_motors;
 
+extern vex::inertial imu;
+
 // Pneumatics
 
 extern vex::digital_out goal_grabber_sol;

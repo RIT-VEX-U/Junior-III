@@ -13,6 +13,7 @@
 		"type_traits": "cpp",
 		"typeinfo": "cpp",
 		"new": "cpp",
-		"iostream": "cpp"
+		"iostream": "cpp",
+		"thread": "cpp"
 	}
 }
