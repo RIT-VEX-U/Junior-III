@@ -185,7 +185,6 @@ bool TurnToPointCommand::run() {
         }
         func_initialized = true;
     }
-    printf("heading: %f\n", heading);
     return drive_sys.turn_to_heading(heading, max_speed, end_speed);
 }
 
@@ -197,8 +196,7 @@ std::string TurnToPointCommand::toString() {
     std::string returnStr = "Turning ";
     returnStr.append((dir == vex::directionType::fwd) ? "towards " : "away from ");
     returnStr.append(
-      " to (" + double_to_string(x) + ", " + double_to_string(y) + ") at " + double_to_string(max_speed * 100) +
-      "% speed"
+      "(" + double_to_string(x) + ", " + double_to_string(y) + ") at " + double_to_string(max_speed * 100) + "% speed"
     );
     return returnStr;
 }

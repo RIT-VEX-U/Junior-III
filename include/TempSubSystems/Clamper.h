@@ -1,5 +1,7 @@
 #pragma once
+#include "core/subsystems/tank_drive.h"
 #include "core/utils/command_structure/auto_command.h"
+#include "core/utils/geometry.h"
 #include "vex.h"
 
 class ClamperSys {
@@ -18,8 +20,8 @@ class ClamperSys {
 
     void toggle_rush_arm();
 
-    void clamp();
-    void unclamp();
+    void goalclamp();
+    void goalunclamp();
 
     void rush_out();
     void rush_in();
@@ -33,6 +35,14 @@ class ClamperSys {
 
     bool is_clamped();
     bool is_rush_out();
+
+    double rush_heading(Translation2d toward_point);
+    double rush_heading(Translation2d toward_point, Pose2d from_pose);
+
+    std::vector<Translation2d> last_rush_points(
+      Translation2d second_last_point, Translation2d final_rush_point, Translation2d toward_point, double bank_radius
+    );
+
     AutoCommand *ClampCmd(ClamperState state);
     AutoCommand *RushCmd(RushState state);
 

@@ -8,6 +8,7 @@ vex::controller con;
 // Digital sensors
 vex::inertial imu(vex::PORT12);
 vex::distance clamper_sensor(vex::PORT18);
+vex::optical color_sensor(vex::PORT13);
 
 // ================ OUTPUTS ================
 // Motors
@@ -26,6 +27,12 @@ vex::motor_group right_drive_motors({right_back_bottom, right_center_bottom, rig
 vex::motor conveyor(vex::PORT4, vex::gearSetting::ratio6_1, true);
 vex::motor intake_motor(vex::PORT6, vex::gearSetting::ratio6_1, false);
 
+std::vector<vex::motor> all_motors{left_back_bottom,  left_center_bottom,  left_back_top,  left_front_top,
+                                   right_back_bottom, right_center_bottom, right_back_top, right_front_top,
+                                   conveyor,          intake_motor};
+
+vex::digital_out mcglight_board(Brain.ThreeWirePort.F);
+
 // pnematices
 vex::digital_out goal_grabber_sol{Brain.ThreeWirePort.H};
 vex::digital_out goal_rush_sol{Brain.ThreeWirePort.G};
@@ -40,7 +47,7 @@ const vex::controller::button &conveyor_button_rev = con.ButtonR2;
 PID::pid_config_t drive_pid_cfg{
   .p = 0.5,
   .i = 0,
-  .d = 0.03,
+  .d = 0.02,
   .deadband = 0.5,
   .on_target_time = 0.1,
 };
@@ -86,7 +93,7 @@ ClamperSys clamper_sys{};
 IntakeSys intake_sys{};
 
 Pose2d zero{0, 0, from_degrees(0)};
-Pose2d blue_r_test{124.6, 101.6, from_degrees(180)};
+Pose2d red_r_test{19.4, 42.4, from_degrees(0)};
 
 OdometryTank odom(left_drive_motors, right_drive_motors, robot_cfg, &imu);
 
@@ -101,10 +108,66 @@ void print_multiline(const std::string &str, int y, int x);
  * Main robot initialization on startup. Runs before opcontrol and autonomous are started.
  */
 void robot_init() {
-    odom.set_position(blue_r_test);
+    odom.set_position(red_r_test);
+    screen::start_screen(
+      Brain.Screen, {new screen::StatsPage(
+                      {{"left front top", left_front_top},
+                       {"left back top", left_back_top},
+                       {"left center bottom", left_center_bottom},
+                       {"left back bottom", left_back_bottom},
+                       {"right front top", right_front_top},
+                       {"right back top", right_back_top},
+                       {"right center bottom", right_center_bottom},
+                       {"right back bottom", right_back_bottom},
+                       {"intake", intake_motor},
+                       {"conveyor", conveyor}}
+                    )}
+    );
+    if (!imu.installed()) {
+        printf("no imu installed\n");
+    }
     while (imu.isCalibrating()) {
         vexDelay(10);
     }
-    screen::start_screen(Brain.Screen, {new screen::PIDPage(turn_pid, "turnpid")});
-    printf("started!\n");
+    printf("imu calibrated!\n");
+    bool all_motors_cool = true;
+    bool all_motors_installed = true;
+    std::vector<vex::motor> overheated_motors;
+    for (vex::motor &mot : all_motors) {
+        if (mot.temperature(vex::temperatureUnits::celsius) > 40) {
+            printf("motor on port: %d too hot\n", mot.index() + 1);
+            overheated_motors.push_back(mot);
+            all_motors_cool = false;
+        }
+        if (!mot.installed()) {
+            printf("motor on port: %f not installed\n", mot.index() + 1);
+            all_motors_installed = false;
+        }
+    }
+    if (!all_motors_cool && all_motors_installed) {
+        printf("waiting for motors to cool...\n");
+        while (!all_motors_cool) {
+            all_motors_cool = true;
+            for (int i = 0; i < overheated_motors.size(); i++) {
+                if (overheated_motors[i].temperature(vex::temperatureUnits::celsius) > 35) {
+                    all_motors_cool = false;
+                }
+                if (overheated_motors[i].temperature(vex::temperatureUnits::celsius) < 35) {
+                    overheated_motors.erase(overheated_motors.begin() + i);
+                    printf("motor on port: %f, has cooled off\n", overheated_motors[i].index() + 1);
+                }
+            }
+        }
+        printf("all motors cooled off\n");
+    }
+    if (!all_motors_installed) {
+        printf("some motors not installed!\n");
+    }
+    if (!color_sensor.installed()) {
+        printf("no color sensor installed\n");
+    }
+    if (!clamper_sensor.installed()) {
+        printf("no clamper sensor installed\n");
+    }
+    printf("ready!\n");
 }

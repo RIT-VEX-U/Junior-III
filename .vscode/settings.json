@@ -12,6 +12,9 @@
 		"limits": "cpp",
 		"type_traits": "cpp",
 		"typeinfo": "cpp",
-		"new": "cpp"
+		"new": "cpp",
+		"cmath": "cpp",
+		"complex": "cpp",
+		"random": "cpp"
 	}
 }

@@ -13,6 +13,7 @@ extern vex::controller con;
 // ================ INPUTS ================
 // Digital sensors
 extern vex::distance clamper_sensor;
+extern vex::optical color_sensor;
 // Analog sensors
 
 // ================ OUTPUTS ================
@@ -32,6 +33,8 @@ extern vex::motor intake_motor;
 
 extern vex::motor_group left_drive_motors;
 extern vex::motor_group right_drive_motors;
+
+extern vex::digital_out mcglight_board;
 
 // Pneumatics
 
