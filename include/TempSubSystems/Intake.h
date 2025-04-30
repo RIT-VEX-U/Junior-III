@@ -32,6 +32,9 @@ class IntakeSys {
     void conveyor_stop();
     void conveyor_out(double volts = 12.0);
 
+    void print_color_values(bool printColors);
+    void print_conveyor_data(bool printConData);
+
     void start_color_sort();
     void stop_color_sort();
 
@@ -47,7 +50,10 @@ class IntakeSys {
     AutoCommand *ConveyorOutCmd(double amt = 12.0);
     AutoCommand *ConveyorStopCmd();
 
-    void fixConveyorStalling(bool fix_conveyor_stalling);
+    AutoCommand *PrintConveyorDataCmd(bool printConData);
+    AutoCommand *PrintColorHuesCmd(bool printColorHues);
+
+    void fixConveyorStalling(bool true_to_fix);
 
     AutoCommand *ColorSortCmd(bool do_color_sorting);
 
@@ -60,8 +66,13 @@ class IntakeSys {
     RingColor color_to_remove = BLUE;
     double intakeVolts = 12;
     double conveyorVolts = 12;
-    bool con_stopped_for_sort = false;
+
     bool do_color_sort = false;
     bool fix_conveyor_stalling = false;
+
+    bool printColorHues = false;
+    bool printConveyorData = false;
+
     bool con_reversed_for_fix = false;
+    bool con_stopped_for_sort = false;
 };

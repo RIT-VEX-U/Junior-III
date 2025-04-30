@@ -93,19 +93,8 @@ void testing() {
         } else {
             enableDrive = false;
         }
-        intake_sys.fixConveyorStalling(true);
         printf("running test");
         CommandController cc{
-          new Async(new FunctionCommand([]() {
-              while (true) {
-                  //   printf(
-                  //     "ODO X: %f ODO Y: %f, ODO ROT: %f, TurnPID Error: %f\n", odom.get_position().x(),
-                  //     odom.get_position().y(), odom.get_position().rotation().degrees(), turn_pid.get_error()
-                  //   );
-                  vexDelay(100);
-              }
-              return true;
-          })),
           intake_sys.OuttakeCmd(),
           clamper_sys.RushCmd(ClamperSys::RushState::OUT),
           drive_sys.PurePursuitCmd(
@@ -123,30 +112,49 @@ void testing() {
           clamper_sys.AutoClampCmd(true),
           drive_sys.DriveForwardCmd(15, vex::reverse, 0.2),
           clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
-          drive_sys.TurnDegreesCmd(15),
-          drive_sys.TurnDegreesCmd(-15),
+          drive_sys.TurnDegreesCmd(15)->withTimeout(1),
+          drive_sys.TurnDegreesCmd(-15)->withTimeout(1),
           intake_sys.ColorSortCmd(true),
           drive_sys.TurnToPointCmd({48, 19.5}, vex::forward),
           intake_sys.ConveyorInCmd(),
           intake_sys.IntakeCmd(),
-          drive_sys.DriveForwardCmd(16, vex::forward, 0.4),
-          drive_sys.PurePursuitCmd(PurePursuit::Path({{40, 24}, {24, 24}, {10, 30.5}}, 8), vex::forward, 0.3),
+          drive_sys.DriveForwardCmd(24, vex::forward, 0.4),
+          drive_sys.PurePursuitCmd(PurePursuit::Path({{40, 24}, {24, 24}, {9, 31.5}}, 8), vex::forward, 0.3),
+          new DelayCommand(500),
           drive_sys.DriveToPointCmd({24, 24}, vex::reverse, 0.3),
           drive_sys.TurnToHeadingCmd(213.5),
+          intake_sys.PrintConveyorDataCmd(true),
+          intake_sys.OuttakeCmd(),
           drive_sys.DriveForwardCmd(24, vex::forward, 0.4)->withTimeout(1),
-          new DelayCommand(200),
+          intake_sys.IntakeCmd(),
+          new DelayCommand(500),
           drive_sys.DriveForwardCmd(10, vex::reverse, 0.4),
-          drive_sys.DriveForwardCmd(12, vex::forward, 0.4)->withTimeout(1),
-          new DelayCommand(200),
+          intake_sys.OuttakeCmd(),
+          drive_sys.DriveForwardCmd(14, vex::forward, 0.4)->withTimeout(1),
+          intake_sys.IntakeCmd(),
+          new DelayCommand(500),
           drive_sys.DriveForwardCmd(10, vex::reverse, 0.4),
-          drive_sys.DriveForwardCmd(12, vex::forward, 0.4)->withTimeout(1),
-          new DelayCommand(200),
+          intake_sys.OuttakeCmd(),
+          drive_sys.DriveForwardCmd(14, vex::forward, 0.4)->withTimeout(1),
+          intake_sys.IntakeCmd(),
+          new DelayCommand(500),
           drive_sys.DriveForwardCmd(10, vex::reverse, 0.4),
-          drive_sys.DriveForwardCmd(12, vex::forward, 0.4)->withTimeout(1),
-          new DelayCommand(200),
+          intake_sys.OuttakeCmd(),
+          drive_sys.DriveForwardCmd(14, vex::forward, 0.4)->withTimeout(1),
+          intake_sys.IntakeCmd(),
+          new DelayCommand(500),
           drive_sys.DriveForwardCmd(24, vex::reverse, 0.4),
+          intake_sys.PrintConveyorDataCmd(false),
+          drive_sys.TurnToHeadingCmd(48)->withTimeout(1),
+          clamper_sys.ClampCmd(ClamperSys::ClamperState::UNCLAMPED),
+          drive_sys.DriveForwardCmd(24, vex::reverse)->withTimeout(1),
+          drive_sys.DriveForwardCmd(24),
+          //   drive_sys.TurnToHeadingCmd(193),
+          //   drive_sys.DriveForwardCmd(32, vex::reverse, 0.4),
+          //   clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
 
         };
+        intake_sys.fixConveyorStalling(true);
         cc.run();
         intake_sys.fixConveyorStalling(false);
         enableDrive = true;
