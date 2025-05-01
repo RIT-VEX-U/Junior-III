@@ -29,6 +29,8 @@ class ClamperSys {
     void auto_clamp_on();
     void auto_clamp_off();
 
+    void print_clamping_dist(bool true_to_print);
+
     bool is_auto_clamping();
 
     void auto_clamp();
@@ -48,10 +50,14 @@ class ClamperSys {
 
     AutoCommand *AutoClampCmd(bool do_auto_clamping);
 
+    AutoCommand *PrintClampingDistCmd(bool true_to_print);
+
   private:
     static int thread_fn(void *ptr);
 
     bool doAutoClamping = false;
+
+    bool printClampingDist = false;
 
     vex::task task;
     ClamperState clamper_state = ClamperState::UNCLAMPED;

@@ -28,7 +28,10 @@ void ClamperSys::toggle_rush_arm() {
 }
 
 void ClamperSys::auto_clamp() {
-    printf("distance: %f\n", clamper_sensor.objectDistance(vex::distanceUnits::mm));
+    if (printClampingDist) {
+        printf("distance: %f\n", clamper_sensor.objectDistance(vex::distanceUnits::mm));
+    }
+
     if (clamper_sensor.objectDistance(vex::distanceUnits::mm) <= 50) {
         clamper_state = ClamperState::CLAMPED;
     } else {
@@ -39,6 +42,8 @@ void ClamperSys::auto_clamp() {
 void ClamperSys::auto_clamp_on() { doAutoClamping = true; }
 
 void ClamperSys::auto_clamp_off() { doAutoClamping = false; }
+
+void ClamperSys::print_clamping_dist(bool true_to_print) { printClampingDist = true_to_print; }
 
 bool ClamperSys::is_auto_clamping() { return doAutoClamping; }
 
@@ -111,6 +116,13 @@ AutoCommand *ClamperSys::RushCmd(RushState state) {
 AutoCommand *ClamperSys::AutoClampCmd(bool do_auto_clamping) {
     return new FunctionCommand([this, do_auto_clamping]() {
         doAutoClamping = do_auto_clamping;
+        return true;
+    });
+}
+
+AutoCommand *ClamperSys::PrintClampingDistCmd(bool true_to_print) {
+    return new FunctionCommand([this, true_to_print]() {
+        print_clamping_dist(true_to_print);
         return true;
     });
 }

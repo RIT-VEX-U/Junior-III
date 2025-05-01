@@ -31,6 +31,8 @@ void IntakeSys::start_color_sort() { do_color_sort = true; }
 
 void IntakeSys::stop_color_sort() { do_color_sort = false; }
 
+void IntakeSys::color_to_remove(IntakeSys::RingColor ring_color) { colorToRemove = ring_color; }
+
 bool IntakeSys::seeing_red() {
     if (color_sensor.hue() > 348 || color_sensor.hue() < 50) {
         return true;
@@ -71,12 +73,12 @@ void IntakeSys::colorSort() {
     if (printColorHues) {
         printf("color hue: %f\n", color_sensor.hue());
     }
-    if (color_to_remove == BLUE && seeing_blue()) {
+    if (colorToRemove == BLUE && seeing_blue()) {
         printf("seeing blue!\n");
         conveyor_state = IntakeState::STOP;
         con_stopped_for_sort = true;
         color_sort_timer.reset();
-    } else if (color_to_remove == RED && seeing_red()) {
+    } else if (colorToRemove == RED && seeing_red()) {
         printf("seeing red!\n");
         conveyor_state = IntakeState::STOP;
         con_stopped_for_sort = true;
@@ -174,6 +176,13 @@ AutoCommand *IntakeSys::ConveyorOutCmd(double amt) {
 AutoCommand *IntakeSys::ConveyorStopCmd() {
     return new FunctionCommand([this]() {
         conveyor_stop();
+        return true;
+    });
+}
+
+AutoCommand *IntakeSys::FixConveyorStallingCmd(bool true_to_fix) {
+    return new FunctionCommand([this, true_to_fix]() {
+        fix_conveyor_stalling = true_to_fix;
         return true;
     });
 }

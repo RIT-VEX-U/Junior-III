@@ -38,6 +38,8 @@ class IntakeSys {
     void start_color_sort();
     void stop_color_sort();
 
+    void color_to_remove(IntakeSys::RingColor ring_color);
+
     void conveyor_stalled_fix();
 
     static int thread_fn(void *ptr);
@@ -49,6 +51,8 @@ class IntakeSys {
     AutoCommand *ConveyorInCmd(double amt = 12.0);
     AutoCommand *ConveyorOutCmd(double amt = 12.0);
     AutoCommand *ConveyorStopCmd();
+
+    AutoCommand *FixConveyorStallingCmd(bool true_to_fx);
 
     AutoCommand *PrintConveyorDataCmd(bool printConData);
     AutoCommand *PrintColorHuesCmd(bool printColorHues);
@@ -63,7 +67,7 @@ class IntakeSys {
     vex::task task;
     IntakeState intake_state = IntakeState::STOP;
     IntakeState conveyor_state = IntakeState::STOP;
-    RingColor color_to_remove = BLUE;
+    RingColor colorToRemove = BLUE;
     double intakeVolts = 12;
     double conveyorVolts = 12;
 

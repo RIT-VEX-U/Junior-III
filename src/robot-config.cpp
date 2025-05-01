@@ -93,7 +93,8 @@ ClamperSys clamper_sys{};
 IntakeSys intake_sys{};
 
 Pose2d zero{0, 0, from_degrees(0)};
-Pose2d red_r_test{19.4, 42.4, from_degrees(0)};
+Pose2d red_pos_test{19.4, 42.4, from_degrees(0)};
+Pose2d blue_pos_test{91.4, 42.4, from_degrees(180)};
 
 OdometryTank odom(left_drive_motors, right_drive_motors, robot_cfg, &imu);
 
@@ -108,7 +109,7 @@ void print_multiline(const std::string &str, int y, int x);
  * Main robot initialization on startup. Runs before opcontrol and autonomous are started.
  */
 void robot_init() {
-    odom.set_position(red_r_test);
+    odom.set_position(blue_pos_test);
     screen::start_screen(
       Brain.Screen, {new screen::StatsPage(
                       {{"left front top", left_front_top},
