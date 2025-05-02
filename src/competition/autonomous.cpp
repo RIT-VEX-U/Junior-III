@@ -10,7 +10,7 @@ void bluebot_redside_neg();
 void bluebot_blueside_neg();
 
 // Main Autonomous Function
-void autonomous() { bluebot_blueside_pos(); };
+void autonomous() { bluebot_redside_pos(); };
 
 // Autonomous Path Implementations
 void bluebot_redside_pos() {
@@ -22,19 +22,19 @@ void bluebot_redside_pos() {
       // goal rush 1
       clamper_sys.RushCmd(ClamperSys::RushState::OUT),
       drive_sys.PurePursuitCmd(
-        PurePursuit::Path({{25.97, 41.99}, {36.47, 40.59}, {49.05, 37.84}, {59.86, 34.19}}, 7), vex::forward
+        PurePursuit::Path({{25.97, 41.99}, {36.47, 40.59}, {49.05, 37.84}, {59.86, 36.19}}, 7), vex::forward
       ),
       clamper_sys.RushCmd(ClamperSys::RushState::IN),
       drive_sys.DriveToPointCmd({49.7, 40.9}, vex::reverse),
       intake_sys.IntakeStopCmd(),
       // goal rush 2
-      drive_sys.TurnToHeadingCmd(60.5),
+      drive_sys.TurnToHeadingCmd(65),
       clamper_sys.RushCmd(ClamperSys::RushState::OUT),
-      drive_sys.DriveForwardCmd(24),
+      drive_sys.DriveForwardCmd(26),
       clamper_sys.RushCmd(ClamperSys::RushState::IN),
-      drive_sys.DriveForwardCmd(20, vex::reverse),
+      drive_sys.DriveForwardCmd(22, vex::reverse),
       // get goal 1
-      drive_sys.TurnToPointCmd({60, 23.5}, vex::reverse),
+      drive_sys.TurnToPointCmd({62.5, 24.5}, vex::reverse),
       clamper_sys.AutoClampCmd(true),
       drive_sys.DriveForwardCmd(15, vex::reverse, 0.2),
       clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),

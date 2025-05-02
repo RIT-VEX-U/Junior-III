@@ -111,7 +111,7 @@ void print_multiline(const std::string &str, int y, int x);
  * Main robot initialization on startup. Runs before opcontrol and autonomous are started.
  */
 void robot_init() {
-    odom.set_position(blue_pos_position);
+    odom.set_position(red_pos_position);
     screen::start_screen(
       Brain.Screen, {new screen::StatsPage(
                       {{"left front top", left_front_top},

@@ -4,7 +4,6 @@
 #include "robot-config.h"
 #include "vex.h"
 
-
 void testing();
 /**
  * Main entrypoint for the driver control period
@@ -12,7 +11,7 @@ void testing();
 bool enableDrive = true;
 void opcontrol() {
     // autonomous();
-    testing();
+    // testing();
 
     goal_grabber.pressed([]() { clamper_sys.toggle_clamp(); });
 
