@@ -13,6 +13,23 @@ void opcontrol() {
     // autonomous();
     // testing();
 
+    wallstake_toggler.pressed([]() {
+        wallstake_sys.hold = true;
+        if (wallstake_sys.get_angle().degrees() < 10 || wallstake_motor.velocity(vex::velocityUnits::dps) > 5) {
+            wallstake_sys.set_setpoint(from_degrees(25));
+            wallstake_sol.set(false);
+        } else if (wallstake_sys.get_angle().degrees() > 10) {
+            wallstake_sys.set_setpoint(from_degrees(140));
+            wallstake_sol.set(true);
+        }
+    });
+
+    wallstake_stow.pressed([]() {
+        wallstake_sys.hold = true;
+        wallstake_sys.set_setpoint(from_degrees(2));
+        wallstake_sol.set(false);
+    });
+
     goal_grabber.pressed([]() { clamper_sys.toggle_clamp(); });
 
     conveyor_button.pressed([]() {

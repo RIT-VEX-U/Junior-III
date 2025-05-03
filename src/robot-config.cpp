@@ -98,6 +98,28 @@ Pose2d blue_pos_position{124.6, 42.4, from_degrees(180)};
 Pose2d blue_neg_position{123.5, 102.25, from_degrees(180)};
 // Posed2d red_neg_position{};
 
+PID::pid_config_t wallstake_pid_cfg{
+  .p = 0.32,
+  .i = 0,
+  .d = 0.00,
+  .deadband = 1,
+  .error_method = PID::ERROR_TYPE::LINEAR,
+};
+
+vex::rotation wallstake_sensor(vex::PORT16, false);
+vex::motor wallstake_motor(vex::PORT15, vex::gearSetting::ratio6_1, false);
+vex::digital_out wallstake_sol{Brain.ThreeWirePort.E};
+const vex::controller::button &wallstake_toggler = con.ButtonL1;
+const vex::controller::button &wallstake_stow = con.ButtonL2;
+const vex::controller::button &wallstake_alliancestake = con.ButtonDown;
+PID wallstake_pid(wallstake_pid_cfg);
+Rotation2d wallstake_tolerance(0);
+Rotation2d wallstake_setpoint(0);
+double wallstake_offset = 0;
+WallStakeMech wallstake_sys{wallstake_motor,    wallstake_sensor, wallstake_tolerance,
+  wallstake_setpoint, wallstake_offset, wallstake_pid};
+
+
 OdometryTank odom(left_drive_motors, right_drive_motors, robot_cfg, &imu);
 
 TankDrive drive_sys(left_drive_motors, right_drive_motors, robot_cfg, &odom);

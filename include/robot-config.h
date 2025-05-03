@@ -41,11 +41,20 @@ extern vex::digital_out mcglight_board;
 extern vex::digital_out goal_grabber_sol;
 extern vex::digital_out goal_rush_sol;
 
+extern vex::digital_out wallstake_sol;
+extern vex::motor wallstake_motor;
+
+
+
 // Button Definitions
 extern const controller::button &goal_grabber;
 extern const controller::button &goal_rush_arm;
 extern const controller::button &conveyor_button;
 extern const controller::button &conveyor_button_rev;
+
+extern const vex::controller::button &wallstake_toggler;
+extern const vex::controller::button &wallstake_stow;
+extern const vex::controller::button &wallstake_alliancestake;
 
 // ================ SUBSYSTEMS ================
 extern ClamperSys clamper_sys;
@@ -54,6 +63,9 @@ extern IntakeSys intake_sys;
 extern PID drive_pid;
 extern PID turn_pid;
 extern PID::pid_config_t correction_pid_cfg;
+
+extern WallStakeMech wallstake_sys;
+
 
 extern OdometryTank odom;
 
