@@ -7,7 +7,7 @@ vex::controller con;
 // ================ INPUTS ================
 // Digital sensors
 vex::inertial imu(vex::PORT12);
-vex::distance clamper_sensor(vex::PORT18);
+vex::distance clamper_sensor(vex::PORT17);
 vex::optical color_sensor(vex::PORT13);
 
 // ================ OUTPUTS ================

@@ -75,12 +75,12 @@ void IntakeSys::colorSort() {
     }
     if (colorToRemove == BLUE && seeing_blue()) {
         printf("seeing blue!\n");
-        intakeVolts = 3;
+        intakeVolts = 1;
         con_stopped_for_sort = true;
         color_sort_timer.reset();
     } else if (colorToRemove == RED && seeing_red()) {
         printf("seeing red!\n");
-        intakeVolts = 3;
+        intakeVolts = 1;
         con_stopped_for_sort = true;
         color_sort_timer.reset();
     }
