@@ -1,5 +1,6 @@
 #pragma once
 #include "competition/opcontrol.h"
+#include "competition/autonomous.h"
 #include "robot-config.h"
 #include "vex.h"
 
@@ -84,6 +85,7 @@ void testing() {
         } else {
             enableDrive = false;
         }
-        printf("running test");
+        autonomous();
+        enableDrive = true;
     });
 }

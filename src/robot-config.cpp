@@ -7,7 +7,7 @@ vex::controller con;
 // ================ INPUTS ================
 // Digital sensors
 vex::inertial imu(vex::PORT12);
-vex::distance clamper_sensor(vex::PORT18);
+vex::distance clamper_sensor(vex::PORT17);
 vex::optical color_sensor(vex::PORT13);
 
 // ================ OUTPUTS ================
@@ -94,9 +94,9 @@ IntakeSys intake_sys{};
 
 Pose2d zero{0, 0, from_degrees(0)};
 Pose2d red_pos_position{19.4, 42.4, from_degrees(0)};
-Pose2d blue_pos_position{91.4, 42.4, from_degrees(180)};
+Pose2d blue_pos_position{124.6, 42.4, from_degrees(180)};
 Pose2d blue_neg_position{123.5, 102.25, from_degrees(180)};
-//Posed2d red_neg_position{};
+// Posed2d red_neg_position{};
 
 OdometryTank odom(left_drive_motors, right_drive_motors, robot_cfg, &imu);
 
@@ -111,7 +111,7 @@ void print_multiline(const std::string &str, int y, int x);
  * Main robot initialization on startup. Runs before opcontrol and autonomous are started.
  */
 void robot_init() {
-    odom.set_position(blue_neg_position);
+    odom.set_position(red_pos_position);
     screen::start_screen(
       Brain.Screen, {new screen::StatsPage(
                       {{"left front top", left_front_top},
