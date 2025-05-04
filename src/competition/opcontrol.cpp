@@ -1,4 +1,3 @@
-#pragma once
 #include "competition/opcontrol.h"
 #include "competition/autonomous.h"
 #include "robot-config.h"
