@@ -43,9 +43,22 @@ void IntakeSys::IntakeScreen::draw(vex::brain::lcd &screen, bool fd, unsigned in
     screen.setFillColor(vex::black);
     screen.printAt(40, 87, "Removing:");
     screen.drawRectangle(40, 100, COL_WIDTH, COL_HEIGHT, colorToRemove);
+
+    double conv_pos = conveyor.position(vex::rotationUnits::deg);
+    screen.setPenColor(vex::white);
+    screen.setFillColor(vex::black);
+    screen.printAt(120, 80, "deg: %.3f", conv_pos);
+    screen.printAt(120, 95, "hue: %.3f", color_sensor.hue());
+    screen.printAt(120, 110, "ner: %d", (int)color_sensor.isNearObject());
+
+    screen.printAt(40, 137, "Seeing:");
+    screen.drawRectangle(40, 140, COL_WIDTH, COL_HEIGHT, color_sensor.color());
 }
 screen::Page *IntakeSys::Page() { return new IntakeScreen(this); }
-IntakeSys::IntakeSys() { task = vex::task(thread_fn, this); }
+IntakeSys::IntakeSys() {
+    task = vex::task(thread_fn, this);
+    color_sensor.integrationTime(3);
+}
 
 void IntakeSys::intake(double volts) {
     intake_state = IntakeState::IN;
@@ -77,13 +90,6 @@ void IntakeSys::stop_color_sort() { do_color_sort = false; }
 
 void IntakeSys::color_to_remove(IntakeSys::RingColor ring_color) { colorToRemove = ring_color; }
 
-bool IntakeSys::seeing_red() {
-    if ((color_sensor.hue() > 348 || color_sensor.hue() < 50) && color_sensor.isNearObject()) {
-        return true;
-    } else {
-        return false;
-    }
-}
 void IntakeSys::conveyor_stalled_fix() {
     if (printConveyorData) {
         printf(
@@ -105,6 +111,14 @@ void IntakeSys::conveyor_stalled_fix() {
     }
 }
 
+bool IntakeSys::seeing_red() {
+    if ((color_sensor.hue() > 348 || color_sensor.hue() < 50) && color_sensor.isNearObject()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool IntakeSys::seeing_blue() {
     if (color_sensor.hue() > 150 && color_sensor.hue() < 250 && color_sensor.isNearObject()) {
         return true;
@@ -113,24 +127,44 @@ bool IntakeSys::seeing_blue() {
     }
 }
 
+bool should_be_sorting = false;
 void IntakeSys::colorSort() {
+
     if (printColorHues) {
         printf("color hue: %f\n", color_sensor.hue());
     }
-    if (colorToRemove == BLUE && seeing_blue()) {
-        intakeVolts = 1;
-        con_stopped_for_sort = true;
-        color_sort_timer.reset();
-    } else if (colorToRemove == RED && seeing_red()) {
-        intakeVolts = 1;
+
+    double deg = conveyor.position(vex::degrees);
+    bool see_blue = seeing_blue();
+    bool see_red = seeing_red();
+    bool currently_tracking = see_red || see_blue;
+    bool should_sort_this_guy = (colorToRemove == BLUE && see_blue) || (colorToRemove == RED && see_red);
+    if (should_sort_this_guy) {
+        should_be_sorting = true;
+    }
+    if (currently_tracking && !was_tracking) {
+        deg_at_start_of_tracking = deg;
+    }
+    if (was_tracking && !currently_tracking) {
+        deg_at_end_of_tracking = deg;
+    }
+    double delta_deg = deg - deg_at_start_of_tracking;
+    double thresh = 240;
+    if (should_be_sorting && delta_deg > thresh) {
+        conveyorVolts = -1;
         con_stopped_for_sort = true;
         color_sort_timer.reset();
     }
-    if (color_sort_timer.time(vex::timeUnits::msec) > 150 && con_stopped_for_sort) {
-        printf("resetting conveyor\n");
-        intakeVolts = 12;
+
+    double time_thresh = 0.300;
+
+    if ((color_sort_timer.value() > time_thresh) && con_stopped_for_sort) {
+        printf("%.3f, %.3f, %.3f\n", deg_at_start_of_tracking, deg_at_end_of_tracking, delta_deg);
+        conveyorVolts = 12;
         con_stopped_for_sort = false;
+        should_be_sorting = false;
     }
+    was_tracking = currently_tracking;
 }
 
 void IntakeSys::print_color_values(bool printColors) { printColorHues = printColors; }
@@ -141,6 +175,14 @@ int IntakeSys::thread_fn(void *ptr) {
     IntakeSys &self = *(IntakeSys *)ptr;
 
     while (true) {
+        if (self.do_color_sort) {
+            self.colorSort();
+
+            mcglight_board.set(1);
+        } else {
+            mcglight_board.set(0);
+        }
+
         if (self.intake_state == IntakeState::IN) {
             intake_motor.spin(vex::fwd, self.intakeVolts, vex::volt);
             // printf("IntakeState IN \n");
@@ -157,13 +199,6 @@ int IntakeSys::thread_fn(void *ptr) {
             conveyor.spin(vex::reverse, self.conveyorVolts, vex::volt);
         } else if (self.conveyor_state == IntakeState::STOP) {
             conveyor.stop();
-        }
-        if (self.do_color_sort) {
-            self.colorSort();
-
-            mcglight_board.set(1);
-        } else {
-            mcglight_board.set(0);
         }
         if (self.fix_conveyor_stalling) {
             self.conveyor_stalled_fix();

@@ -53,6 +53,7 @@ void opcontrol() {
     goal_rush_arm.pressed([]() { clamper_sys.toggle_rush_arm(); });
 
     intake_sys.start_color_sort();
+    intake_sys.color_to_remove(IntakeSys::BLUE);
     // ================ INIT ================
 
     while (true) {

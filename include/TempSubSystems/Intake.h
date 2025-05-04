@@ -94,4 +94,8 @@ class IntakeSys {
 
     bool con_reversed_for_fix = false;
     bool con_stopped_for_sort = false;
+
+    bool was_tracking = false;
+    double deg_at_start_of_tracking = 0;
+    double deg_at_end_of_tracking = 0;
 };
