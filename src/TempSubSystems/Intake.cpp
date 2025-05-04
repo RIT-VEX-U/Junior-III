@@ -127,7 +127,6 @@ bool IntakeSys::seeing_blue() {
     }
 }
 
-bool should_be_sorting = false;
 void IntakeSys::colorSort() {
 
     if (printColorHues) {
@@ -150,6 +149,10 @@ void IntakeSys::colorSort() {
     }
     double delta_deg = deg - deg_at_start_of_tracking;
     double thresh = 240;
+    if (colorToRemove == RED) {
+        thresh = 210;
+    }
+
     if (should_be_sorting && delta_deg > thresh) {
         conveyorVolts = -1;
         con_stopped_for_sort = true;
@@ -159,7 +162,6 @@ void IntakeSys::colorSort() {
     double time_thresh = 0.300;
 
     if ((color_sort_timer.value() > time_thresh) && con_stopped_for_sort) {
-        printf("%.3f, %.3f, %.3f\n", deg_at_start_of_tracking, deg_at_end_of_tracking, delta_deg);
         conveyorVolts = 12;
         con_stopped_for_sort = false;
         should_be_sorting = false;
