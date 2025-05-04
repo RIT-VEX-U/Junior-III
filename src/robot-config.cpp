@@ -1,4 +1,3 @@
-#pragma once
 #include "robot-config.h"
 
 vex::brain Brain;
@@ -135,18 +134,22 @@ void print_multiline(const std::string &str, int y, int x);
 void robot_init() {
     odom.set_position(red_pos_position);
     screen::start_screen(
-      Brain.Screen, {new screen::StatsPage(
-                      {{"left front top", left_front_top},
-                       {"left back top", left_back_top},
-                       {"left center bottom", left_center_bottom},
-                       {"left back bottom", left_back_bottom},
-                       {"right front top", right_front_top},
-                       {"right back top", right_back_top},
-                       {"right center bottom", right_center_bottom},
-                       {"right back bottom", right_back_bottom},
-                       {"intake", intake_motor},
-                       {"conveyor", conveyor}}
-                    )}
+      Brain.Screen,
+      {
+        intake_sys.Page(),
+        new screen::StatsPage(
+          {{"left front top", left_front_top},
+           {"left back top", left_back_top},
+           {"left center bottom", left_center_bottom},
+           {"left back bottom", left_back_bottom},
+           {"right front top", right_front_top},
+           {"right back top", right_back_top},
+           {"right center bottom", right_center_bottom},
+           {"right back bottom", right_back_bottom},
+           {"intake", intake_motor},
+           {"conveyor", conveyor}}
+        ),
+      }
     );
     if (!imu.installed()) {
         printf("no imu installed\n");
@@ -160,12 +163,12 @@ void robot_init() {
     std::vector<vex::motor> overheated_motors;
     for (vex::motor &mot : all_motors) {
         if (mot.temperature(vex::temperatureUnits::celsius) > 40) {
-            printf("motor on port: %d too hot\n", mot.index() + 1);
+            printf("motor on port: %ld too hot\n", mot.index() + 1);
             overheated_motors.push_back(mot);
             all_motors_cool = false;
         }
         if (!mot.installed()) {
-            printf("motor on port: %f not installed\n", mot.index() + 1);
+            printf("motor on port: %ld not installed\n", mot.index() + 1);
             all_motors_installed = false;
         }
     }

@@ -1,8 +1,20 @@
 #pragma once
+#include "core/subsystems/screen.h"
 #include "core/utils/command_structure/auto_command.h"
 #include "vex.h"
+
 class IntakeSys {
   public:
+    class IntakeScreen : public screen::Page {
+      public:
+        IntakeScreen(IntakeSys *self);
+        void update(bool was_pressed, int x, int y) override;
+        void draw(vex::brain::lcd &screen, bool first_draw, unsigned int frame_number);
+
+      private:
+        IntakeSys *self;
+    };
+
     IntakeSys();
 
     enum IntakeState {
@@ -60,6 +72,9 @@ class IntakeSys {
     void fixConveyorStalling(bool true_to_fix);
 
     AutoCommand *ColorSortCmd(bool do_color_sorting);
+
+  // allocates and returns a new page. only call this once (or free it yourself)
+    screen::Page *Page();
 
   private:
     vex::timer color_sort_timer;

@@ -1,6 +1,50 @@
 #include "TempSubSystems/Intake.h"
 #include "robot-config.h"
 
+IntakeSys::IntakeScreen::IntakeScreen(IntakeSys *scr) : self(scr) {}
+void IntakeSys::IntakeScreen::update(bool, int, int) { return; }
+
+void IntakeSys::IntakeScreen::draw(vex::brain::lcd &screen, bool fd, unsigned int fn) {
+    vex::color seeingBlueCol = vex::color::black;
+    if (self->seeing_blue()) {
+        seeingBlueCol = vex::color::blue;
+    }
+
+    vex::color seeingRedCol = vex::color::black;
+    if (self->seeing_red()) {
+        seeingRedCol = vex::color::red;
+    }
+
+    static constexpr int COL_WIDTH = 50;
+    static constexpr int COL_HEIGHT = 25;
+    screen.setPenColor(vex::white);
+    screen.setFillColor(vex::black);
+    screen.printAt(37, 20, "Seeing");
+
+    screen.drawRectangle(40, 20, COL_WIDTH, COL_HEIGHT, seeingBlueCol);
+    screen.drawRectangle(40, 20 + COL_HEIGHT, COL_WIDTH, COL_HEIGHT, seeingRedCol);
+
+    screen.setPenColor(vex::red);
+    screen.setFillColor(vex::black);
+    if (self->con_reversed_for_fix) {
+        screen.printAt(100, 20, "STALL");
+    }
+    if (self->con_stopped_for_sort) {
+        screen.printAt(100, 40, "SORT");
+    }
+
+    vex::color colorToRemove = vex::color::black;
+    if (self->colorToRemove == BLUE && self->do_color_sort) {
+        colorToRemove = vex::blue;
+    } else if (self->colorToRemove == RED && self->do_color_sort) {
+        colorToRemove = vex::red;
+    }
+    screen.setPenColor(vex::white);
+    screen.setFillColor(vex::black);
+    screen.printAt(40, 87, "Removing:");
+    screen.drawRectangle(40, 100, COL_WIDTH, COL_HEIGHT, colorToRemove);
+}
+screen::Page *IntakeSys::Page() { return new IntakeScreen(this); }
 IntakeSys::IntakeSys() { task = vex::task(thread_fn, this); }
 
 void IntakeSys::intake(double volts) {
@@ -34,7 +78,7 @@ void IntakeSys::stop_color_sort() { do_color_sort = false; }
 void IntakeSys::color_to_remove(IntakeSys::RingColor ring_color) { colorToRemove = ring_color; }
 
 bool IntakeSys::seeing_red() {
-    if (color_sensor.hue() > 348 || color_sensor.hue() < 50) {
+    if ((color_sensor.hue() > 348 || color_sensor.hue() < 50) && color_sensor.isNearObject()) {
         return true;
     } else {
         return false;
@@ -62,7 +106,7 @@ void IntakeSys::conveyor_stalled_fix() {
 }
 
 bool IntakeSys::seeing_blue() {
-    if (color_sensor.hue() > 150 && color_sensor.hue() < 250) {
+    if (color_sensor.hue() > 150 && color_sensor.hue() < 250 && color_sensor.isNearObject()) {
         return true;
     } else {
         return false;
@@ -74,12 +118,10 @@ void IntakeSys::colorSort() {
         printf("color hue: %f\n", color_sensor.hue());
     }
     if (colorToRemove == BLUE && seeing_blue()) {
-        printf("seeing blue!\n");
         intakeVolts = 1;
         con_stopped_for_sort = true;
         color_sort_timer.reset();
     } else if (colorToRemove == RED && seeing_red()) {
-        printf("seeing red!\n");
         intakeVolts = 1;
         con_stopped_for_sort = true;
         color_sort_timer.reset();
@@ -126,7 +168,7 @@ int IntakeSys::thread_fn(void *ptr) {
         if (self.fix_conveyor_stalling) {
             self.conveyor_stalled_fix();
         }
-        vexDelay(20);
+        vexDelay(10);
     }
     return 0;
 }

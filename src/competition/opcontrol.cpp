@@ -1,4 +1,3 @@
-#pragma once
 #include "competition/opcontrol.h"
 #include "competition/autonomous.h"
 #include "robot-config.h"
@@ -53,6 +52,7 @@ void opcontrol() {
 
     goal_rush_arm.pressed([]() { clamper_sys.toggle_rush_arm(); });
 
+    intake_sys.start_color_sort();
     // ================ INIT ================
 
     while (true) {
