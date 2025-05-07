@@ -1,6 +1,6 @@
 {
 	"C_Cpp.default.systemIncludePath": [
-		"${config:vexrobotics.vexcode.Cpp.Sdk.Home}\\V5\\V5_20240802_15_00_00\\vexv5\\gcc\\include\\sys"
+		"${config:vexrobotics.vexcode.Cpp.Sdk.Home}/V5/V5_20240802_15_00_00/vexv5/gcc/include/sys"
 	],
 	"files.associations": {
 		"future": "cpp",
@@ -15,7 +15,39 @@
 		"new": "cpp",
 		"cmath": "cpp",
 		"complex": "cpp",
-		"random": "cpp"
+		"random": "cpp",
+		"algorithm": "cpp",
+		"array": "cpp",
+		"atomic": "cpp",
+		"cctype": "cpp",
+		"clocale": "cpp",
+		"cstdarg": "cpp",
+		"cstddef": "cpp",
+		"cstdint": "cpp",
+		"cstdio": "cpp",
+		"cstdlib": "cpp",
+		"cstring": "cpp",
+		"ctime": "cpp",
+		"cwchar": "cpp",
+		"cwctype": "cpp",
+		"deque": "cpp",
+		"unordered_map": "cpp",
+		"vector": "cpp",
+		"exception": "cpp",
+		"fstream": "cpp",
+		"initializer_list": "cpp",
+		"iosfwd": "cpp",
+		"iostream": "cpp",
+		"ostream": "cpp",
+		"numeric": "cpp",
+		"ratio": "cpp",
+		"sstream": "cpp",
+		"stdexcept": "cpp",
+		"streambuf": "cpp",
+		"thread": "cpp",
+		"cinttypes": "cpp",
+		"tuple": "cpp",
+		"utility": "cpp"
 	},
 	"C_Cpp.errorSquiggles": "disabled"
 }

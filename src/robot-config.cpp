@@ -92,7 +92,7 @@ ClamperSys clamper_sys{};
 IntakeSys intake_sys{};
 
 Pose2d zero{0, 0, from_degrees(0)};
-Pose2d red_pos_position{19.4, 42.4, from_degrees(0)};
+Pose2d red_pos_position{19.4, 42.4, from_degrees(-10)};
 Pose2d blue_pos_position{124.6, 42.4, from_degrees(180)};
 Pose2d blue_neg_position{123.5, 102.25, from_degrees(180)};
 // Posed2d red_neg_position{};
@@ -122,6 +122,8 @@ WallStakeMech wallstake_sys{wallstake_motor,    wallstake_sensor, wallstake_tole
 OdometryTank odom(left_drive_motors, right_drive_motors, robot_cfg, &imu);
 
 TankDrive drive_sys(left_drive_motors, right_drive_motors, robot_cfg, &odom);
+
+vex::gps gps_sensor{vex::PORT11, -6.5, 3, vex::distanceUnits::in, 90, vex::turnType::left};
 
 // A global instance of vex::brain used for printing to the V5 brain screen
 void print_multiline(const std::string &str, int y, int x);
@@ -154,7 +156,9 @@ void robot_init() {
     if (!imu.installed()) {
         printf("no imu installed\n");
     }
-    while (imu.isCalibrating()) {
+    imu.calibrate();
+    gps_sensor.calibrate();
+    while (imu.isCalibrating() || gps_sensor.isCalibrating()) {
         vexDelay(10);
     }
     printf("imu calibrated!\n");

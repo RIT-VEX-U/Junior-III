@@ -10,6 +10,7 @@
 extern vex::brain brain;
 extern vex::controller con;
 
+extern vex::gps gps_sensor;
 // ================ INPUTS ================
 // Digital sensors
 extern vex::distance clamper_sensor;

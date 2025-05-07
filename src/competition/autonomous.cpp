@@ -11,6 +11,30 @@ AutoCommand *PrintPos() {
     });
 }
 
+AutoCommand *RecalGPSOr(Pose2d orelse) {
+    return new FunctionCommand([bad_gps_count = 0, orelse]() mutable {
+        int thresh = 50;
+
+        if ((!gps_sensor.installed() || gps_sensor.quality() != 100) && bad_gps_count < thresh) {
+            bad_gps_count++;
+
+            return false;
+        }
+
+        if (bad_gps_count >= thresh) {
+            printf("Orelse: %.2f, %.2f    %.2f", orelse.x(), orelse.y(), orelse.rotation().degrees());
+            odom.set_position(orelse);
+            return true;
+        }
+        double x = gps_sensor.xPosition(vex::distanceUnits::in) + 71.25;
+        double y = gps_sensor.yPosition(vex::distanceUnits::in) + 71.25;
+        double heading = deg2rad(wrap_degrees_180(gps_sensor.heading(vex::rotationUnits::deg) + 90));
+        printf("Setting to %.2f, %.2f  %.2f\n", x, y, 180 * heading / PI);
+        odom.set_position(Pose2d(x, y, from_radians(heading)));
+        return true;
+    });
+}
+
 // Autonomous Paths
 void bluebot_redside_pos();
 void bluebot_blueside_pos();
@@ -22,118 +46,141 @@ void autonomous() { bluebot_redside_pos(); };
 
 // Autonomous Path Implementations
 void bluebot_redside_pos() {
-    //vexDelay(2000);
+    // clang-format off
+    vexDelay(2000);
     //intake_sys.color_to_remove(IntakeSys::RingColor::BLUE);
     printf("running r+ autonomous\n");
     CommandController cc{
       // put intake down
+      clamper_sys.RushCmd(ClamperSys::RushState::OUT),
       intake_sys.OuttakeCmd(),
       // goal rush 1,
-      clamper_sys.RushCmd(ClamperSys::RushState::OUT),
       new Async((new FunctionCommand([]() {
                     auto pos = odom.get_position();
                     printf("Pos: (%.2f, %.2f) %.2f\n", pos.x(), pos.y(), pos.rotation().degrees());
                     return false;
                 })
       )->withTimeout(30000)),
-      drive_sys.PurePursuitCmd(
-        PurePursuit::Path(
-          {
-            {25.97, 41.99},
-            {36.47, 40.59},
-            {49.05, 37.84},
-            {59.86, 36.19},
-          },
-          7
-        ),
-        vex::forward, 1
-      ),
-      PrintPos(),
-      // (new DelayCommand(10000000))->withTimeout(100000000),
+      // drive_sys.DriveForwardCmd(39)->withTimeout(2.5), 
+      drive_sys.DriveTankCmd(1,1)->withTimeout(.64),
+      new DelayCommand(100),
       clamper_sys.RushCmd(ClamperSys::RushState::IN),
-      drive_sys.DriveToPointCmd({49.7, 38.9}, vex::reverse),
       intake_sys.IntakeStopCmd(),
-      // goal rush 2
-      drive_sys.TurnToHeadingCmd(65),
+      drive_sys.DriveForwardCmd(22, vex::reverse)->withTimeout(1.5), 
+      drive_sys.TurnToHeadingCmd(54),
       clamper_sys.RushCmd(ClamperSys::RushState::OUT),
-      drive_sys.DriveForwardCmd(30),
+      drive_sys.DriveForwardCmd(34, vex::fwd)->withTimeout(1.5), 
       clamper_sys.RushCmd(ClamperSys::RushState::IN),
-      drive_sys.DriveForwardCmd(20, vex::reverse),
-      // get goal 1
-      drive_sys.TurnToPointCmd({50, 40}, vex::reverse),
-      drive_sys.DriveToPointCmd({50,40}, vex::reverse),
-      drive_sys.TurnToPointCmd({68, 28}, vex::reverse),
-       clamper_sys.AutoClampCmd(true),
-      drive_sys.DriveForwardCmd(7, vex::reverse, 0.2),
-      drive_sys.TurnToPointCmd({66, 24}, vex::reverse),
-      drive_sys.DriveForwardCmd(1, vex::forward, 0.2),
-      drive_sys.DriveForwardCmd(7, vex::reverse, 0.2),
-      clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
-      // get ring 1
-      intake_sys.ColorSortCmd(true),
-      drive_sys.TurnToPointCmd({60,18}, vex::forward),
+      drive_sys.DriveForwardCmd(16, vex::reverse)->withTimeout(1.5), 
+      drive_sys.TurnToHeadingCmd(100)->withTimeout(1.5),
+      RecalGPSOr({42.89, 51.99,  from_degrees(97.82)}),      
+      drive_sys.TurnToHeadingCmd(95)->withTimeout(1.5),
+      drive_sys.DriveForwardCmd(17, vex::reverse, 0.2),
+      new DelayCommand(10000000),
+      clamper_sys.ClampCmd(ClamperSys::CLAMPED),
+      intake_sys.IntakeCmd(),
       intake_sys.ConveyorInCmd(),
-      intake_sys.IntakeCmd(),
-      drive_sys.DriveToPointCmd({60,18}, vex::forward),
-      drive_sys.DriveTankCmd(.8,0)->withTimeout(.6),
-      drive_sys.TurnToPointCmd({24, 12}),
-      drive_sys.DriveToPointCmd({40, 12}, vex::forward, 0.4),
-      drive_sys.DriveTankCmd(.8,0)->withTimeout(.3),
-      drive_sys.TurnToHeadingCmd(135),
-      // get ring 2
-      drive_sys.TurnToPointCmd({24, 24}),
-      drive_sys.DriveToPointCmd({24, 24}, vex::forward, 0.4),
-      new DelayCommand(10000000000000000),
-      // corner nightmare nightmare nightmare
-      drive_sys.TurnToHeadingCmd(213.5),
-      intake_sys.OuttakeCmd(),
-      drive_sys.DriveForwardCmd(24, vex::forward, 0.4)
-        ->withTimeout(1)
-        ->withCancelCondition(drive_sys.DriveStalledCondition(0.5)),
-      intake_sys.IntakeCmd(),
-      intake_sys.FixConveyorStallingCmd(true),
-      new DelayCommand(500),
-      drive_sys.DriveForwardCmd(10, vex::reverse, 0.4),
-      intake_sys.OuttakeCmd(),
-      drive_sys.DriveForwardCmd(14, vex::forward, 0.4)
-        ->withTimeout(1)
-        ->withCancelCondition(drive_sys.DriveStalledCondition(0.5)),
-      intake_sys.IntakeCmd(),
-      new DelayCommand(500),
-      drive_sys.DriveForwardCmd(10, vex::reverse, 0.4),
-      intake_sys.OuttakeCmd(),
-      drive_sys.DriveForwardCmd(14, vex::forward, 0.4)
-        ->withTimeout(1)
-        ->withCancelCondition(drive_sys.DriveStalledCondition(0.5)),
-      intake_sys.IntakeCmd(),
-      new DelayCommand(500),
-      drive_sys.DriveForwardCmd(10, vex::reverse, 0.4),
-      intake_sys.OuttakeCmd(),
-      drive_sys.DriveForwardCmd(14, vex::forward, 0.4)
-        ->withTimeout(1)
-        ->withCancelCondition(drive_sys.DriveStalledCondition(0.5)),
-      intake_sys.IntakeCmd(),
-      new DelayCommand(500),
-      drive_sys.DriveForwardCmd(24, vex::reverse, 0.4),
-      drive_sys.TurnToHeadingCmd(48)->withTimeout(1),
-      clamper_sys.ClampCmd(ClamperSys::ClamperState::UNCLAMPED),
-      drive_sys.DriveForwardCmd(5),
-      clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
-      drive_sys.DriveForwardCmd(29, vex::reverse)
-        ->withTimeout(1)
-        ->withCancelCondition(drive_sys.DriveStalledCondition(0.5)),
-      // get goal 2
-      // delete if we dont have lidar
-      drive_sys.DriveForwardCmd(24),
-      drive_sys.TurnToHeadingCmd(237),
-      // clamper_sys.AutoClampCmd(true),
-      drive_sys.DriveForwardCmd(33, vex::reverse, 0.2),
-      clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
+      drive_sys.TurnToPointCmd({22.58, 27.78})->withTimeout(1.5),
+      new DelayCommand(10000000),
+      //   drive_sys.PurePursuitCmd(
+      //     PurePursuit::Path(
+      //       {
+      //         {25.97, 41.99},
+      //         {36.47, 40.59},
+      //         {49.05, 37.84},
+      //         {59.86, 36.19},
+      //       },
+      //       7
+      //     ),
+      //     vex::forward, 1
+      //   ),
+      //   PrintPos(),
+      //   // (new DelayCommand(10000000))->withTimeout(100000000),
+      //   clamper_sys.RushCmd(ClamperSys::RushState::IN),
+      //   drive_sys.DriveToPointCmd({49.7, 38.9}, vex::reverse),
+      //   intake_sys.IntakeStopCmd(),
+      //   // goal rush 2
+      //   drive_sys.TurnToHeadingCmd(65),
+      //   clamper_sys.RushCmd(ClamperSys::RushState::OUT),
+      //   drive_sys.DriveForwardCmd(30),
+      //   clamper_sys.RushCmd(ClamperSys::RushState::IN),
+      //   drive_sys.DriveForwardCmd(20, vex::reverse),
+      //   // get goal 1
+      //   drive_sys.TurnToPointCmd({50, 40}, vex::reverse),
+      //   drive_sys.DriveToPointCmd({50, 40}, vex::reverse),
+      //   drive_sys.TurnToPointCmd({68, 28}, vex::reverse),
+      //   clamper_sys.AutoClampCmd(true),
+      //   drive_sys.DriveForwardCmd(7, vex::reverse, 0.2),
+      //   drive_sys.TurnToPointCmd({66, 24}, vex::reverse),
+      //   drive_sys.DriveForwardCmd(1, vex::forward, 0.2),
+      //   drive_sys.DriveForwardCmd(7, vex::reverse, 0.2),
+      //   clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
+      //   // get ring 1
+      //   intake_sys.ColorSortCmd(true),
+      //   drive_sys.TurnToPointCmd({60, 18}, vex::forward),
+      //   intake_sys.ConveyorInCmd(),
+      //   intake_sys.IntakeCmd(),
+      //   drive_sys.DriveToPointCmd({60, 18}, vex::forward),
+      //   drive_sys.DriveTankCmd(.8, 0)->withTimeout(.6),
+      //   drive_sys.TurnToPointCmd({24, 12}),
+      //   drive_sys.DriveToPointCmd({40, 12}, vex::forward, 0.4),
+      //   drive_sys.DriveTankCmd(.8, 0)->withTimeout(.3),
+      //   drive_sys.TurnToHeadingCmd(135),
+      //   // get ring 2
+      //   drive_sys.TurnToPointCmd({24, 24}),
+      //   drive_sys.DriveToPointCmd({24, 24}, vex::forward, 0.4),
+      //   new DelayCommand(100000000000000),
+      //   // corner nightmare nightmare nightmare
+      //   drive_sys.TurnToHeadingCmd(213.5),
+      //   intake_sys.OuttakeCmd(),
+      //   drive_sys.DriveForwardCmd(24, vex::forward, 0.4)
+      //     ->withTimeout(1)
+      //     ->withCancelCondition(drive_sys.DriveStalledCondition(0.5)),
+      //   intake_sys.IntakeCmd(),
+      //   intake_sys.FixConveyorStallingCmd(true),
+      //   new DelayCommand(500),
+      //   drive_sys.DriveForwardCmd(10, vex::reverse, 0.4),
+      //   intake_sys.OuttakeCmd(),
+      //   drive_sys.DriveForwardCmd(14, vex::forward, 0.4)
+      //     ->withTimeout(1)
+      //     ->withCancelCondition(drive_sys.DriveStalledCondition(0.5)),
+      //   intake_sys.IntakeCmd(),
+      //   new DelayCommand(500),
+      //   drive_sys.DriveForwardCmd(10, vex::reverse, 0.4),
+      //   intake_sys.OuttakeCmd(),
+      //   drive_sys.DriveForwardCmd(14, vex::forward, 0.4)
+      //     ->withTimeout(1)
+      //     ->withCancelCondition(drive_sys.DriveStalledCondition(0.5)),
+      //   intake_sys.IntakeCmd(),
+      //   new DelayCommand(500),
+      //   drive_sys.DriveForwardCmd(10, vex::reverse, 0.4),
+      //   intake_sys.OuttakeCmd(),
+      //   drive_sys.DriveForwardCmd(14, vex::forward, 0.4)
+      //     ->withTimeout(1)
+      //     ->withCancelCondition(drive_sys.DriveStalledCondition(0.5)),
+      //   intake_sys.IntakeCmd(),
+      //   new DelayCommand(500),
+      //   drive_sys.DriveForwardCmd(24, vex::reverse, 0.4),
+      //   drive_sys.TurnToHeadingCmd(48)->withTimeout(1),
+      //   clamper_sys.ClampCmd(ClamperSys::ClamperState::UNCLAMPED),
+      //   drive_sys.DriveForwardCmd(5),
+      //   clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
+      //   drive_sys.DriveForwardCmd(29, vex::reverse)
+      //     ->withTimeout(1)
+      //     ->withCancelCondition(drive_sys.DriveStalledCondition(0.5)),
+      //   // get goal 2
+      //   // delete if we dont have lidar
+      //   drive_sys.DriveForwardCmd(24),
+      //   drive_sys.TurnToHeadingCmd(237),
+      //   // clamper_sys.AutoClampCmd(true),
+      //   drive_sys.DriveForwardCmd(33, vex::reverse, 0.2),
+      //   clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
     };
     cc.run();
     intake_sys.fixConveyorStalling(false);
     intake_sys.stop_color_sort();
     clamper_sys.auto_clamp_off();
+
 }
 
 void bluebot_blueside_pos() {
