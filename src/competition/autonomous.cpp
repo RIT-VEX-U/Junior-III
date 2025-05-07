@@ -46,18 +46,22 @@ void autonomous() { bluebot_redside_pos(); };
 
 // Autonomous Path Implementations
 void bluebot_redside_pos() {
+    vex::timer tmr;
+    tmr.reset();
     // clang-format off
     vexDelay(2000);
-    //intake_sys.color_to_remove(IntakeSys::RingColor::BLUE);
-    printf("running r+ autonomous\n");
+    intake_sys.color_to_remove(IntakeSys::RingColor::BLUE);
+     intake_sys.start_color_sort();
+     intake_sys.fixConveyorStalling(true);
+   printf("running r+ autonomous\n");
     CommandController cc{
       // put intake down
       clamper_sys.RushCmd(ClamperSys::RushState::OUT),
       intake_sys.OuttakeCmd(),
       // goal rush 1,
-      new Async((new FunctionCommand([]() {
+      new Async((new FunctionCommand([&]() {
                     auto pos = odom.get_position();
-                    printf("Pos: (%.2f, %.2f) %.2f\n", pos.x(), pos.y(), pos.rotation().degrees());
+                    printf("%.2f, Pos: (%.2f, %.2f) %.2f\n", (double)tmr.value(),pos.x(), pos.y(), pos.rotation().degrees());
                     return false;
                 })
       )->withTimeout(30000)),
@@ -76,11 +80,19 @@ void bluebot_redside_pos() {
       RecalGPSOr({42.89, 51.99,  from_degrees(97.82)}),      
       drive_sys.TurnToHeadingCmd(95)->withTimeout(1.5),
       drive_sys.DriveForwardCmd(17, vex::reverse, 0.2),
-      new DelayCommand(10000000),
+      // new DelayCommand(10000000),
       clamper_sys.ClampCmd(ClamperSys::CLAMPED),
+      new DelayCommand(300), // wait for it to finish grabbing
       intake_sys.IntakeCmd(),
       intake_sys.ConveyorInCmd(),
       drive_sys.TurnToPointCmd({22.58, 27.78})->withTimeout(1.5),
+      drive_sys.DriveForwardCmd(23, vex::fwd, 0.6)->withTimeout(3.0),
+      drive_sys.TurnToPointCmd({0, 0})->withTimeout(1.5),
+      drive_sys.DriveForwardCmd(12, vex::fwd, 0.2)->withTimeout(3.0),
+      clamper_sys.RushCmd(ClamperSys::RushState::OUT),
+      drive_sys.TurnDegreesCmd(90)->withTimeout(1.5),
+      clamper_sys.RushCmd(ClamperSys::RushState::IN),
+      drive_sys.TurnToHeadingCmd(45)->withTimeout(1.5),
       new DelayCommand(10000000),
       //   drive_sys.PurePursuitCmd(
       //     PurePursuit::Path(
