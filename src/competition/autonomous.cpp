@@ -58,26 +58,32 @@ void bluebot_redside_pos() {
       clamper_sys.RushCmd(ClamperSys::RushState::OUT),
       drive_sys.DriveForwardCmd(30),
       clamper_sys.RushCmd(ClamperSys::RushState::IN),
-      drive_sys.DriveForwardCmd(10, vex::reverse),
+      drive_sys.DriveForwardCmd(20, vex::reverse),
       // get goal 1
       drive_sys.TurnToPointCmd({50, 40}, vex::reverse),
       drive_sys.DriveToPointCmd({50,40}, vex::reverse),
-      drive_sys.TurnToPointCmd({72, 28}, vex::reverse),
+      drive_sys.TurnToPointCmd({68, 28}, vex::reverse),
        clamper_sys.AutoClampCmd(true),
-      drive_sys.DriveForwardCmd(15, vex::reverse, 0.2),
+      drive_sys.DriveForwardCmd(7, vex::reverse, 0.2),
+      drive_sys.TurnToPointCmd({66, 24}, vex::reverse),
+      drive_sys.DriveForwardCmd(1, vex::forward, 0.2),
+      drive_sys.DriveForwardCmd(7, vex::reverse, 0.2),
       clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
-     /* drive_sys.TurnDegreesCmd(15)->withTimeout(1),
-      drive_sys.TurnDegreesCmd(-15)->withTimeout(1),
       // get ring 1
       intake_sys.ColorSortCmd(true),
-      drive_sys.TurnToPointCmd({52.5, 5.5}, vex::forward),
+      drive_sys.TurnToPointCmd({60,18}, vex::forward),
       intake_sys.ConveyorInCmd(),
       intake_sys.IntakeCmd(),
-      drive_sys.DriveForwardCmd(14, vex::forward, 0.4)->withCancelCondition(drive_sys.DriveStalledCondition(2)),
+      drive_sys.DriveToPointCmd({60,18}, vex::forward),
+      drive_sys.DriveTankCmd(.8,0)->withTimeout(.6),
+      drive_sys.TurnToPointCmd({24, 12}),
+      drive_sys.DriveToPointCmd({40, 12}, vex::forward, 0.4),
+      drive_sys.DriveTankCmd(.8,0)->withTimeout(.3),
+      drive_sys.TurnToHeadingCmd(135),
       // get ring 2
       drive_sys.TurnToPointCmd({24, 24}),
       drive_sys.DriveToPointCmd({24, 24}, vex::forward, 0.4),
-      new DelayCommand(1000000000000),
+      new DelayCommand(10000000000000000),
       // corner nightmare nightmare nightmare
       drive_sys.TurnToHeadingCmd(213.5),
       intake_sys.OuttakeCmd(),
@@ -122,7 +128,7 @@ void bluebot_redside_pos() {
       drive_sys.TurnToHeadingCmd(237),
       // clamper_sys.AutoClampCmd(true),
       drive_sys.DriveForwardCmd(33, vex::reverse, 0.2),
-      clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),*/
+      clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
     };
     cc.run();
     intake_sys.fixConveyorStalling(false);
