@@ -10,7 +10,7 @@ void PID::init(double start_pt, double set_pt) {
     set_target(set_pt);
     target_vel = 0; // TODO change back when trapezoid profiles are fixed
     sensor_val = start_pt;
-    start_pt = start_pt;
+    this->start_pt = start_pt;
     reset();
 }
 

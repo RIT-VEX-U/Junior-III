@@ -148,7 +148,7 @@ void IntakeSys::colorSort() {
         deg_at_end_of_tracking = deg;
     }
     double delta_deg = deg - deg_at_start_of_tracking;
-    double thresh = 240;
+    double thresh = 260;
     if (colorToRemove == RED) {
         thresh = 210;
     }

@@ -9,6 +9,8 @@ void testing();
  */
 bool enableDrive = true;
 void opcontrol() {
+    // intake_sys.color_to_remove(IntakeSys::RingColor::BLUE);
+    // intake_sys.start_color_sort();
     // autonomous();
     // testing();
 

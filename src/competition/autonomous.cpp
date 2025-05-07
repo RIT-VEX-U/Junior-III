@@ -3,6 +3,14 @@
  * Main entrypoint for the autonomous period
  */
 
+AutoCommand *PrintPos() {
+    return new FunctionCommand([]() {
+        auto pos = odom.get_position();
+        printf("Pos: (%.2f, %.2f) %.2f\n", pos.x(), pos.y(), pos.rotation().degrees());
+        return true;
+    });
+}
+
 // Autonomous Paths
 void bluebot_redside_pos();
 void bluebot_blueside_pos();
@@ -14,31 +22,51 @@ void autonomous() { bluebot_redside_pos(); };
 
 // Autonomous Path Implementations
 void bluebot_redside_pos() {
-    intake_sys.color_to_remove(IntakeSys::RingColor::BLUE);
+    //vexDelay(2000);
+    //intake_sys.color_to_remove(IntakeSys::RingColor::BLUE);
     printf("running r+ autonomous\n");
     CommandController cc{
       // put intake down
       intake_sys.OuttakeCmd(),
-      // goal rush 1
+      // goal rush 1,
       clamper_sys.RushCmd(ClamperSys::RushState::OUT),
+      new Async((new FunctionCommand([]() {
+                    auto pos = odom.get_position();
+                    printf("Pos: (%.2f, %.2f) %.2f\n", pos.x(), pos.y(), pos.rotation().degrees());
+                    return false;
+                })
+      )->withTimeout(30000)),
       drive_sys.PurePursuitCmd(
-        PurePursuit::Path({{25.97, 41.99}, {36.47, 40.59}, {49.05, 37.84}, {59.86, 36.19}}, 7), vex::forward
+        PurePursuit::Path(
+          {
+            {25.97, 41.99},
+            {36.47, 40.59},
+            {49.05, 37.84},
+            {59.86, 36.19},
+          },
+          7
+        ),
+        vex::forward, 1
       ),
+      PrintPos(),
+      // (new DelayCommand(10000000))->withTimeout(100000000),
       clamper_sys.RushCmd(ClamperSys::RushState::IN),
-      drive_sys.DriveToPointCmd({49.7, 40.9}, vex::reverse),
+      drive_sys.DriveToPointCmd({49.7, 38.9}, vex::reverse),
       intake_sys.IntakeStopCmd(),
       // goal rush 2
       drive_sys.TurnToHeadingCmd(65),
       clamper_sys.RushCmd(ClamperSys::RushState::OUT),
-      drive_sys.DriveForwardCmd(26),
+      drive_sys.DriveForwardCmd(30),
       clamper_sys.RushCmd(ClamperSys::RushState::IN),
-      drive_sys.DriveForwardCmd(22, vex::reverse),
+      drive_sys.DriveForwardCmd(10, vex::reverse),
       // get goal 1
-      drive_sys.TurnToPointCmd({62.5, 24.5}, vex::reverse),
-      // clamper_sys.AutoClampCmd(true),
+      drive_sys.TurnToPointCmd({50, 40}, vex::reverse),
+      drive_sys.DriveToPointCmd({50,40}, vex::reverse),
+      drive_sys.TurnToPointCmd({72, 28}, vex::reverse),
+       clamper_sys.AutoClampCmd(true),
       drive_sys.DriveForwardCmd(15, vex::reverse, 0.2),
       clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
-      drive_sys.TurnDegreesCmd(15)->withTimeout(1),
+     /* drive_sys.TurnDegreesCmd(15)->withTimeout(1),
       drive_sys.TurnDegreesCmd(-15)->withTimeout(1),
       // get ring 1
       intake_sys.ColorSortCmd(true),
@@ -49,7 +77,7 @@ void bluebot_redside_pos() {
       // get ring 2
       drive_sys.TurnToPointCmd({24, 24}),
       drive_sys.DriveToPointCmd({24, 24}, vex::forward, 0.4),
-      new DelayCommand(1000),
+      new DelayCommand(1000000000000),
       // corner nightmare nightmare nightmare
       drive_sys.TurnToHeadingCmd(213.5),
       intake_sys.OuttakeCmd(),
@@ -94,7 +122,7 @@ void bluebot_redside_pos() {
       drive_sys.TurnToHeadingCmd(237),
       // clamper_sys.AutoClampCmd(true),
       drive_sys.DriveForwardCmd(33, vex::reverse, 0.2),
-      clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),
+      clamper_sys.ClampCmd(ClamperSys::ClamperState::CLAMPED),*/
     };
     cc.run();
     intake_sys.fixConveyorStalling(false);
