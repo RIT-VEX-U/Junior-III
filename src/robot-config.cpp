@@ -37,8 +37,8 @@ vex::digital_out goal_grabber_sol{Brain.ThreeWirePort.H};
 vex::digital_out goal_rush_sol{Brain.ThreeWirePort.G};
 
 // Button Definitions
-const vex::controller::button &goal_grabber = con.ButtonY;
-const vex::controller::button &goal_rush_arm = con.ButtonLeft;
+const vex::controller::button &goal_grabber = con.ButtonRight;
+const vex::controller::button &goal_rush_arm = con.ButtonA;
 const vex::controller::button &conveyor_button = con.ButtonR1;
 const vex::controller::button &conveyor_button_rev = con.ButtonR2;
 
@@ -109,8 +109,8 @@ vex::rotation wallstake_sensor(vex::PORT16, false);
 vex::motor wallstake_motor(vex::PORT15, vex::gearSetting::ratio6_1, false);
 vex::digital_out wallstake_sol{Brain.ThreeWirePort.E};
 const vex::controller::button &wallstake_toggler = con.ButtonL1;
-const vex::controller::button &wallstake_stow = con.ButtonL2;
-const vex::controller::button &wallstake_alliancestake = con.ButtonDown;
+const vex::controller::button &wallstake_stow = con.ButtonY;
+const vex::controller::button &wallstake_alliancestake = con.ButtonL2;
 PID wallstake_pid(wallstake_pid_cfg);
 Rotation2d wallstake_tolerance(0);
 Rotation2d wallstake_setpoint(0);

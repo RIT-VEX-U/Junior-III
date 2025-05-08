@@ -11,25 +11,51 @@ bool enableDrive = true;
 void opcontrol() {
     // intake_sys.color_to_remove(IntakeSys::RingColor::BLUE);
     // intake_sys.start_color_sort();
-    autonomous();
+    // autonomous();
     // testing();
 
     wallstake_toggler.pressed([]() {
         wallstake_sys.hold = true;
-        if (wallstake_sys.get_angle().degrees() < 10 || wallstake_motor.velocity(vex::velocityUnits::dps) > 5) {
+        if (wallstake_sys.get_angle().degrees() < 10) {
             wallstake_sys.set_setpoint(from_degrees(25));
             wallstake_sol.set(false);
-        } else if (wallstake_sys.get_angle().degrees() > 10) {
+            printf("go handoff\n");
+        } else if (!wallstake_sol.value() && wallstake_sys.get_angle().degrees() > 10) {
             wallstake_sys.set_setpoint(from_degrees(140));
             wallstake_sol.set(true);
+            printf("go up\n");
+        } else if (wallstake_sol.value() || wallstake_sys.get_angle().degrees() > 130){
+            wallstake_sys.set_setpoint(from_degrees(2));
+            wallstake_sol.set(false);
+            printf("go down\n");
+        }
+
+    });
+    wallstake_alliancestake.pressed([]() {
+        wallstake_sys.hold = true;
+        if (wallstake_sys.get_angle().degrees() < 10) {
+            wallstake_sys.set_setpoint(from_degrees(25));
+            printf("go handoff\n");
+        } else if (!wallstake_sol.value() && wallstake_sys.get_angle().degrees() > 10) {
+            wallstake_sys.set_setpoint(from_degrees(180));
+            printf("go up\n");
+        } else if (wallstake_sol.value() || wallstake_sys.get_angle().degrees() > 180){
+            wallstake_sys.set_setpoint(from_degrees(2));
+            wallstake_sol.set(false);
+            printf("go down\n");
         }
     });
 
     wallstake_stow.pressed([]() {
         wallstake_sys.hold = true;
-        wallstake_sys.set_setpoint(from_degrees(2));
-        wallstake_sol.set(false);
-    });
+        if (wallstake_sys.get_angle().degrees() < 10) {
+            wallstake_sys.set_setpoint(from_degrees(25));
+            printf("go handoff\n");
+        } else {
+            wallstake_sys.set_setpoint(from_degrees(2));
+            wallstake_sol.set(false);
+        }
+});
 
     goal_grabber.pressed([]() { clamper_sys.toggle_clamp(); });
 
