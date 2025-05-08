@@ -161,6 +161,8 @@ void robot_init() {
     while (imu.isCalibrating() || gps_sensor.isCalibrating()) {
         vexDelay(10);
     }
+
+    gps_sensor.setOrigin(1.75,4, vex::distanceUnits::in);
     printf("imu calibrated!\n");
     bool all_motors_cool = true;
     bool all_motors_installed = true;
