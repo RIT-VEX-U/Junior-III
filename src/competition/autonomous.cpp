@@ -40,9 +40,10 @@ void bluebot_redside_pos();
 void bluebot_blueside_pos();
 void bluebot_redside_neg();
 void bluebot_blueside_neg();
+void bluebot_blueside_pos_new();
 
 // Main Autonomous Function
-void autonomous() { bluebot_redside_pos(); };
+void autonomous() { bluebot_blueside_pos_new(); };
 
 // Autonomous Path Implementations
 void bluebot_redside_pos() {
@@ -201,7 +202,75 @@ void bluebot_redside_pos() {
 
 }
 
+void bluebot_blueside_pos_new() {
+  vex::timer tmr;
+  tmr.reset();
+  // clang-format off
+  vexDelay(2000);
+  intake_sys.color_to_remove(IntakeSys::RingColor::RED);
+   intake_sys.start_color_sort();
+   intake_sys.fixConveyorStalling(true);
+ printf("running r+ autonomous\n");
+  CommandController cc{
+    // put intake down
+    clamper_sys.RushCmd(ClamperSys::RushState::OUT),
+    intake_sys.OuttakeCmd(),
+    // goal rush 1,
+    new Async((new FunctionCommand([&]() {
+                  auto pos = odom.get_position();
+                  printf("%.2f, Pos: (%.2f, %.2f) %.2f\n", (double)tmr.value(),pos.x(), pos.y(), pos.rotation().degrees());
+                  vexDelay(200);
+                  return false;
+              })
+    )->withTimeout(30000)),
+    // drive_sys.DriveForwardCmd(39)->withTimeout(2.5), 
+    intake_sys.OuttakeCmd(),
+    clamper_sys.RushCmd(ClamperSys::RushState::OUT),
+    new DelayCommand(100),
+    drive_sys.DriveTankCmd(1,1)->withTimeout(.7),
+    // new DelayCommand(100),
+    clamper_sys.RushCmd(ClamperSys::RushState::IN),
+    intake_sys.IntakeStopCmd(),
+    drive_sys.DriveForwardCmd(20, vex::reverse)->withTimeout(1.5),
+    intake_sys.IntakeCmd(),
+    drive_sys.TurnToHeadingCmd(60),
+    drive_sys.TurnToHeadingCmd(142),
+    clamper_sys.RushCmd(ClamperSys::RushState::OUT),
+    drive_sys.DriveForwardCmd(34, vex::fwd)->withTimeout(1.5), 
+    clamper_sys.RushCmd(ClamperSys::RushState::IN),
+    drive_sys.DriveForwardCmd(16, vex::reverse)->withTimeout(1.5), 
+    drive_sys.TurnToHeadingCmd(100)->withTimeout(1.5),
+    RecalGPSOr({92.00, 54.50,  from_degrees(82.18)}),
+    RecalGPSOr({92.00, 54.50,  from_degrees(82.18)}),
+    RecalGPSOr({92.00, 54.50,  from_degrees(82.18)}),   
+    drive_sys.TurnToHeadingCmd(85)->withTimeout(1.5),
+    drive_sys.DriveForwardCmd(17, vex::reverse, 0.2),
+    clamper_sys.ClampCmd(ClamperSys::CLAMPED),
+    new DelayCommand(300), // wait for it to finish grabbing
+    intake_sys.IntakeCmd(),
+    intake_sys.ConveyorInCmd(),
+    drive_sys.TurnToPointCmd({134, 24})->withTimeout(1.5),
+    drive_sys.DriveToPointCmd({134, 24}, vex::fwd, 0.6)->withTimeout(3.0),
+    drive_sys.TurnToPointCmd({148, 0})->withTimeout(1.5),
+    clamper_sys.RushCmd(ClamperSys::RushState::OUT),
+    drive_sys.DriveForwardCmd(21.5, vex::fwd, 0.2)->withTimeout(3.0),
+    drive_sys.TurnDegreesCmd(90)->withTimeout(1.5),
+    clamper_sys.RushCmd(ClamperSys::RushState::IN),
+    drive_sys.TurnToPointCmd({144, 0}, vex::reverse)->withTimeout(1.5),
+    drive_sys.DriveForwardCmd(10, vex::fwd, 0.3)->withTimeout(1.5),
+    clamper_sys.ClampCmd(ClamperSys::UNCLAMPED),
+    drive_sys.DriveForwardCmd(25, vex::reverse, 1)->withTimeout(1.5),
+    drive_sys.DriveForwardCmd(25, vex::fwd, 0.3)->withTimeout(1.5),
+    
+  };
+  cc.run();
+  intake_sys.fixConveyorStalling(false);
+  intake_sys.stop_color_sort();
+  clamper_sys.auto_clamp_off();
+}
+
 void bluebot_blueside_pos() {
+  intake_sys.start_color_sort();
     intake_sys.color_to_remove(IntakeSys::RingColor::RED);
     printf("running b+ autonomous\n");
     printf(

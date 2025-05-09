@@ -94,6 +94,7 @@ IntakeSys intake_sys{};
 Pose2d zero{0, 0, from_degrees(0)};
 Pose2d red_pos_position{19.4, 42.4, from_degrees(-10)};
 Pose2d blue_pos_position{124.6, 42.4, from_degrees(180)};
+Pose2d blue_pos_position_new{124.6, 42.4, from_degrees(180+40)};
 Pose2d blue_neg_position{123.5, 102.25, from_degrees(180)};
 // Posed2d red_neg_position{};
 
@@ -134,7 +135,7 @@ void print_multiline(const std::string &str, int y, int x);
  * Main robot initialization on startup. Runs before opcontrol and autonomous are started.
  */
 void robot_init() {
-    odom.set_position(red_pos_position);
+    odom.set_position(blue_pos_position_new);
     screen::start_screen(
       Brain.Screen,
       {
